@@ -98,7 +98,6 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for branching strategy, pull request pr
 | Name | Role |
 |---|---|
 | Tex Yonzo | Developer |
-| Ilan Njontu | Founder |
 
 ---
 
