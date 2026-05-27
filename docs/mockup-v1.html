@@ -1,0 +1,1579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cogitons — UI Mockup V1</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300;1,9..40,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ── Design tokens ──────────────────────────────────────── */
+:root {
+  --navy:       #0F2744;
+  --navy-light: #1A3C5E;
+  --blue:       #1E5FA8;
+  --blue-soft:  #2E6DA4;
+  --sky:        #E8F0F7;
+  --sky-mid:    #C8DDEF;
+  --sky-deep:   #A8C8E8;
+  --cream:      #FAF8F5;
+  --cream-dark: #F0EDE8;
+  --sand:       #E8E2D8;
+  --text:       #0F1A26;
+  --text-2:     #3A4A5A;
+  --text-3:     #6A7A8A;
+  --text-4:     #9AAABB;
+  --green:      #1A6645;
+  --green-bg:   #E8F5EE;
+  --red:        #A82020;
+  --red-bg:     #FAE8E8;
+  --amber:      #7A5010;
+  --amber-bg:   #FFF5E0;
+  --white:      #FFFFFF;
+  --border:     #DDD8D0;
+  --border-soft:#E8E4DC;
+  --radius:     6px;
+  --radius-lg:  10px;
+  --shadow:     0 1px 3px rgba(15,39,68,.06), 0 4px 16px rgba(15,39,68,.04);
+  --shadow-lg:  0 4px 24px rgba(15,39,68,.10), 0 1px 4px rgba(15,39,68,.06);
+  --font-serif: 'Lora', Georgia, serif;
+  --font-sans:  'DM Sans', system-ui, sans-serif;
+  --font-mono:  'DM Mono', monospace;
+}
+
+/* ── Reset ──────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-sans);
+  background: #1A1A2E;
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  gap: 0;
+}
+
+/* ── Sidebar navigator ──────────────────────────────────── */
+.sidebar {
+  width: 200px;
+  min-height: 100vh;
+  background: #0F1520;
+  padding: 24px 0;
+  position: fixed;
+  left: 0; top: 0; bottom: 0;
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+}
+.sidebar-logo {
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-style: italic;
+  color: #AAC8E8;
+  padding: 0 20px 20px;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+  margin-bottom: 16px;
+  letter-spacing: .01em;
+}
+.sidebar-logo span { color: rgba(255,255,255,.3); font-size: 10px; font-style: normal; font-family: var(--font-mono); display: block; margin-top: 2px; }
+.sidebar-section { font-size: 9px; font-family: var(--font-mono); color: rgba(255,255,255,.25); letter-spacing: .1em; text-transform: uppercase; padding: 8px 20px 4px; }
+.nav-btn {
+  display: block; width: 100%;
+  text-align: left;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 400;
+  color: rgba(255,255,255,.45);
+  padding: 7px 20px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nav-btn:hover { color: rgba(255,255,255,.8); background: rgba(255,255,255,.04); }
+.nav-btn.active { color: #AAC8E8; background: rgba(170,200,232,.08); font-weight: 500; border-left: 2px solid #AAC8E8; padding-left: 18px; }
+
+/* ── Main canvas ────────────────────────────────────────── */
+.canvas {
+  margin-left: 200px;
+  flex: 1;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.screen-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: rgba(255,255,255,.25);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  align-self: flex-start;
+}
+
+/* ── Browser chrome ─────────────────────────────────────── */
+.browser {
+  width: 100%;
+  max-width: 1100px;
+  background: var(--cream);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.3);
+}
+.browser-bar {
+  background: #2A2A2A;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  gap: 12px;
+}
+.browser-dots { display: flex; gap: 6px; }
+.dot { width: 11px; height: 11px; border-radius: 50%; }
+.dot.r { background: #FF5F57; }
+.dot.y { background: #FFBD2E; }
+.dot.g { background: #28C840; }
+.browser-url {
+  flex: 1;
+  background: #3A3A3A;
+  border-radius: 5px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: rgba(255,255,255,.5);
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+/* ── Screens (hidden by default) ───────────────────────── */
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* ── GLOBAL NAV ─────────────────────────────────────────── */
+.app-nav {
+  background: var(--navy);
+  height: 52px;
+  display: flex;
+  align-items: center;
+  padding: 0 28px;
+  gap: 0;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.app-nav-logo {
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-style: italic;
+  color: var(--white);
+  letter-spacing: -.3px;
+  margin-right: 36px;
+  flex-shrink: 0;
+}
+.app-nav-search {
+  flex: 1;
+  max-width: 380px;
+  height: 32px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 7px;
+  margin-right: auto;
+}
+.app-nav-search input {
+  background: none; border: none; outline: none;
+  font-family: var(--font-sans); font-size: 12px;
+  color: rgba(255,255,255,.7); width: 100%;
+}
+.app-nav-search input::placeholder { color: rgba(255,255,255,.3); }
+.search-icon { color: rgba(255,255,255,.35); font-size: 13px; flex-shrink: 0; }
+.app-nav-links { display: flex; align-items: center; gap: 6px; }
+.nav-link {
+  font-size: 12px; font-weight: 400;
+  color: rgba(255,255,255,.55);
+  padding: 6px 10px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: color .15s;
+}
+.nav-link:hover { color: rgba(255,255,255,.9); }
+.nav-link.active { color: var(--white); }
+.btn-signup {
+  font-size: 12px; font-weight: 500;
+  background: var(--blue);
+  color: var(--white);
+  padding: 6px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  margin-left: 4px;
+  border: none;
+  transition: background .15s;
+}
+.btn-signup:hover { background: var(--blue-soft); }
+.nav-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--blue);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 600; color: var(--white);
+  cursor: pointer; margin-left: 6px;
+}
+
+/* ── Page wrapper ───────────────────────────────────────── */
+.page { background: var(--cream); min-height: 500px; }
+
+/* ── HOME SCREEN ────────────────────────────────────────── */
+.home-hero {
+  background: var(--navy);
+  padding: 48px 28px 40px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.home-hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 60% 80% at 50% -20%, rgba(30,95,168,.5) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--sky-deep);
+  margin-bottom: 14px;
+  position: relative;
+}
+.hero-title {
+  font-family: var(--font-serif);
+  font-size: 36px;
+  font-weight: 600;
+  color: var(--white);
+  line-height: 1.2;
+  margin-bottom: 10px;
+  position: relative;
+}
+.hero-title em { font-style: italic; color: var(--sky-deep); }
+.hero-sub {
+  font-size: 14px;
+  color: rgba(255,255,255,.5);
+  max-width: 480px;
+  margin: 0 auto 24px;
+  line-height: 1.6;
+  position: relative;
+}
+.hero-search {
+  display: flex;
+  max-width: 520px;
+  margin: 0 auto;
+  background: var(--white);
+  border-radius: 30px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0,0,0,.2);
+  position: relative;
+}
+.hero-search input {
+  flex: 1; border: none; outline: none;
+  padding: 13px 20px;
+  font-family: var(--font-sans);
+  font-size: 13px; color: var(--text);
+}
+.hero-search input::placeholder { color: var(--text-4); }
+.hero-search-btn {
+  background: var(--blue); color: var(--white);
+  border: none; padding: 0 24px;
+  font-size: 12px; font-weight: 500;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.home-body { padding: 32px 28px; display: grid; grid-template-columns: 1fr 280px; gap: 28px; }
+
+.section-title {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 14px;
+}
+
+.subject-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 28px; }
+.subject-card {
+  background: var(--white);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+  cursor: pointer;
+  transition: all .2s;
+  box-shadow: var(--shadow);
+}
+.subject-card:hover { border-color: var(--sky-deep); box-shadow: var(--shadow-lg); transform: translateY(-1px); }
+.sc-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+.sc-title { font-family: var(--font-serif); font-size: 14px; font-weight: 500; color: var(--navy); line-height: 1.3; }
+.sc-count { font-family: var(--font-mono); font-size: 10px; color: var(--text-4); white-space: nowrap; padding-top: 1px; flex-shrink: 0; }
+.sc-desc { font-size: 11.5px; color: var(--text-2); line-height: 1.5; }
+
+.feed-item {
+  background: var(--white);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: all .15s;
+  box-shadow: var(--shadow);
+}
+.feed-item:hover { border-color: var(--sky-deep); }
+.fi-subject { font-family: var(--font-mono); font-size: 10px; color: var(--blue); letter-spacing: .04em; margin-bottom: 5px; }
+.fi-title { font-family: var(--font-serif); font-size: 14px; font-weight: 500; color: var(--navy); line-height: 1.4; margin-bottom: 5px; }
+.fi-body { font-size: 12px; color: var(--text-2); line-height: 1.5; margin-bottom: 10px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.fi-meta { display: flex; align-items: center; gap: 12px; }
+.fi-author { display: flex; align-items: center; gap: 6px; }
+.fi-avatar { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 600; color: var(--white); flex-shrink: 0; }
+.av-1 { background: #1E5FA8; } .av-2 { background: #1A6645; } .av-3 { background: #7A3A80; } .av-4 { background: #C05020; }
+.fi-name { font-size: 11px; color: var(--text-3); }
+.fi-time { font-family: var(--font-mono); font-size: 10px; color: var(--text-4); margin-left: auto; }
+.fi-useful { font-family: var(--font-mono); font-size: 10px; color: var(--text-3); }
+.fi-replies { font-family: var(--font-mono); font-size: 10px; color: var(--text-3); }
+
+/* Sidebar widgets */
+.widget {
+  background: var(--white);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow);
+}
+.widget-title { font-family: var(--font-mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--text-3); margin-bottom: 12px; }
+.stat-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid var(--border-soft); }
+.stat-row:last-child { border-bottom: none; padding-bottom: 0; }
+.stat-label { font-size: 12px; color: var(--text-2); }
+.stat-val { font-family: var(--font-mono); font-size: 12px; font-weight: 500; color: var(--navy); }
+.recent-item { padding: 7px 0; border-bottom: 1px solid var(--border-soft); }
+.recent-item:last-child { border-bottom: none; padding-bottom: 0; }
+.ri-text { font-size: 12px; color: var(--text-2); line-height: 1.4; margin-bottom: 2px; cursor: pointer; }
+.ri-text:hover { color: var(--blue); }
+.ri-meta { font-family: var(--font-mono); font-size: 10px; color: var(--text-4); }
+
+/* ── SUBJECTS LIST ──────────────────────────────────────── */
+.page-header {
+  background: var(--white);
+  border-bottom: 1px solid var(--border-soft);
+  padding: 24px 28px 20px;
+}
+.page-header-title { font-family: var(--font-serif); font-size: 24px; font-weight: 500; color: var(--navy); margin-bottom: 4px; }
+.page-header-sub { font-size: 13px; color: var(--text-3); }
+.subjects-grid { padding: 24px 28px; display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+.subject-card-lg {
+  background: var(--white);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  cursor: pointer;
+  transition: all .2s;
+  box-shadow: var(--shadow);
+}
+.subject-card-lg:hover { border-color: var(--sky-deep); box-shadow: var(--shadow-lg); transform: translateY(-1px); }
+.scl-num { font-family: var(--font-mono); font-size: 10px; color: var(--sky-deep); margin-bottom: 10px; }
+.scl-title { font-family: var(--font-serif); font-size: 15px; font-weight: 500; color: var(--navy); margin-bottom: 6px; line-height: 1.3; }
+.scl-desc { font-size: 12px; color: var(--text-2); line-height: 1.5; margin-bottom: 12px; }
+.scl-footer { display: flex; justify-content: space-between; align-items: center; }
+.scl-count { font-family: var(--font-mono); font-size: 10px; color: var(--text-4); }
+.scl-arrow { font-size: 14px; color: var(--sky-deep); }
+
+/* ── SUBJECT DETAIL ─────────────────────────────────────── */
+.subject-hero {
+  background: var(--navy);
+  padding: 28px 28px 24px;
+  position: relative;
+  overflow: hidden;
+}
+.subject-hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 120% at 0% 50%, rgba(30,95,168,.35) 0%, transparent 60%);
+}
+.subject-breadcrumb { font-family: var(--font-mono); font-size: 10px; color: rgba(255,255,255,.3); letter-spacing: .05em; margin-bottom: 12px; cursor: pointer; position: relative; }
+.subject-breadcrumb:hover { color: rgba(255,255,255,.6); }
+.subject-hero-title { font-family: var(--font-serif); font-size: 28px; font-weight: 600; color: var(--white); margin-bottom: 8px; position: relative; }
+.subject-hero-desc { font-size: 13px; color: rgba(255,255,255,.55); line-height: 1.6; max-width: 600px; margin-bottom: 20px; position: relative; }
+.subject-hero-bar { display: flex; align-items: center; justify-content: space-between; position: relative; }
+.subject-stats { display: flex; gap: 20px; }
+.ss-item { }
+.ss-val { font-family: var(--font-mono); font-size: 16px; font-weight: 500; color: var(--white); }
+.ss-label { font-size: 10px; color: rgba(255,255,255,.35); }
+.btn-primary {
+  background: var(--blue);
+  color: var(--white);
+  border: none;
+  padding: 9px 20px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: background .15s;
+  white-space: nowrap;
+}
+.btn-primary:hover { background: #2567B5; }
+
+.disc-controls {
+  background: var(--white);
+  border-bottom: 1px solid var(--border-soft);
+  padding: 12px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.disc-count { font-size: 12px; color: var(--text-3); }
+.sort-group { display: flex; gap: 4px; }
+.sort-btn {
+  font-family: var(--font-sans);
+  font-size: 11px; font-weight: 400;
+  padding: 4px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: none;
+  color: var(--text-3);
+  cursor: pointer;
+  transition: all .15s;
+}
+.sort-btn.on { background: var(--navy); color: var(--white); border-color: var(--navy); font-weight: 500; }
+
+.disc-list { padding: 16px 28px; }
+.disc-card {
+  background: var(--white);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: all .15s;
+  box-shadow: var(--shadow);
+}
+.disc-card:hover { border-color: var(--sky-deep); }
+.dc-top { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.dc-avatar { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 600; color: var(--white); flex-shrink: 0; }
+.dc-name { font-size: 12px; font-weight: 500; color: var(--text-2); }
+.dc-time { font-family: var(--font-mono); font-size: 10px; color: var(--text-4); margin-left: auto; }
+.dc-title { font-family: var(--font-serif); font-size: 14px; font-weight: 500; color: var(--navy); margin-bottom: 5px; line-height: 1.4; }
+.dc-preview { font-size: 12px; color: var(--text-2); line-height: 1.5; margin-bottom: 10px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.dc-footer { display: flex; align-items: center; gap: 10px; }
+.useful-pill {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11px; font-family: var(--font-mono);
+  padding: 3px 10px; border-radius: 12px;
+  border: 1px solid var(--border);
+  color: var(--text-3); background: none;
+  cursor: pointer; transition: all .15s;
+}
+.useful-pill:hover, .useful-pill.on {
+  background: var(--green-bg); color: var(--green); border-color: #9ACAB0;
+}
+.useful-pill .check { font-size: 10px; }
+.replies-count { font-family: var(--font-mono); font-size: 11px; color: var(--text-4); }
+
+/* ── DISCUSSION THREAD ──────────────────────────────────── */
+.thread-container { padding: 20px 28px; display: grid; grid-template-columns: 1fr 240px; gap: 24px; align-items: start; }
+
+.thread-main {}
+.thread-op {
+  background: var(--white);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  padding: 20px 22px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+.thread-breadcrumb { font-family: var(--font-mono); font-size: 10px; color: var(--text-4); margin-bottom: 12px; cursor: pointer; }
+.thread-breadcrumb:hover { color: var(--blue); }
+.thread-title { font-family: var(--font-serif); font-size: 20px; font-weight: 600; color: var(--navy); line-height: 1.4; margin-bottom: 12px; }
+.thread-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--border-soft); }
+.thread-body { font-size: 13px; color: var(--text-2); line-height: 1.7; margin-bottom: 16px; }
+.thread-actions { display: flex; align-items: center; gap: 10px; }
+.report-btn { font-size: 11px; color: var(--text-4); background: none; border: none; cursor: pointer; padding: 0; font-family: var(--font-sans); }
+.report-btn:hover { color: var(--red); }
+
+.responses-header {
+  font-family: var(--font-mono);
+  font-size: 10px; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--text-3); margin-bottom: 12px;
+}
+.response-card {
+  background: var(--white);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+  margin-bottom: 10px;
+  box-shadow: var(--shadow);
+}
+.response-card.top-answer {
+  border-left: 3px solid var(--green);
+  background: linear-gradient(to right, rgba(26,102,69,.03), var(--white) 40%);
+}
+.top-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-family: var(--font-mono); font-size: 9px;
+  color: var(--green); background: var(--green-bg);
+  padding: 2px 8px; border-radius: 10px;
+  margin-left: 6px;
+}
+.rc-meta { display: flex; align-items: center; gap: 7px; margin-bottom: 10px; }
+.rc-body { font-size: 12.5px; color: var(--text-2); line-height: 1.7; margin-bottom: 10px; }
+.rc-actions { display: flex; align-items: center; gap: 10px; }
+.edited-label { font-family: var(--font-mono); font-size: 10px; color: var(--text-4); font-style: italic; margin-left: auto; }
+
+.reply-box {
+  background: var(--white);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+  margin-top: 4px;
+  box-shadow: var(--shadow);
+}
+.reply-box-title { font-size: 12px; font-weight: 500; color: var(--text-2); margin-bottom: 10px; }
+.reply-textarea {
+  width: 100%; height: 88px;
+  background: var(--cream);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  font-family: var(--font-sans); font-size: 12.5px; color: var(--text);
+  resize: none; outline: none;
+}
+.reply-textarea::placeholder { color: var(--text-4); }
+.reply-footer { display: flex; justify-content: flex-end; margin-top: 10px; }
+
+.thread-sidebar {}
+.thread-widget {
+  background: var(--white);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow);
+}
+.tw-title { font-family: var(--font-mono); font-size: 10px; letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); margin-bottom: 10px; }
+.tw-subject { font-family: var(--font-serif); font-size: 14px; color: var(--navy); margin-bottom: 4px; }
+.tw-desc { font-size: 11.5px; color: var(--text-3); line-height: 1.4; }
+
+/* ── CREATE DISCUSSION ──────────────────────────────────── */
+.form-page { padding: 28px; max-width: 720px; margin: 0 auto; }
+.form-page-title { font-family: var(--font-serif); font-size: 22px; font-weight: 500; color: var(--navy); margin-bottom: 4px; }
+.form-page-sub { font-size: 13px; color: var(--text-3); margin-bottom: 24px; }
+.form-card {
+  background: var(--white);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+}
+.form-group { margin-bottom: 18px; }
+.form-group:last-child { margin-bottom: 0; }
+.form-label { font-size: 12px; font-weight: 500; color: var(--text); margin-bottom: 6px; display: block; }
+.form-sub-label { font-size: 11px; color: var(--text-3); margin-bottom: 8px; display: block; margin-top: -4px; }
+.form-input {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 9px 12px;
+  font-family: var(--font-sans); font-size: 13px; color: var(--text);
+  background: var(--cream);
+  outline: none;
+  transition: border-color .15s;
+}
+.form-input:focus { border-color: var(--blue); background: var(--white); }
+.form-textarea {
+  width: 100%; height: 160px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  font-family: var(--font-sans); font-size: 13px; color: var(--text);
+  background: var(--cream); resize: vertical; outline: none;
+  transition: border-color .15s;
+  line-height: 1.6;
+}
+.form-textarea:focus { border-color: var(--blue); background: var(--white); }
+.subject-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--sky); border: 1px solid var(--sky-mid);
+  padding: 5px 12px; border-radius: 20px;
+  font-family: var(--font-mono); font-size: 11px; color: var(--navy-light);
+}
+.form-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 4px; }
+.btn-secondary {
+  background: none; color: var(--text-3);
+  border: 1px solid var(--border);
+  padding: 8px 18px; border-radius: 20px;
+  font-size: 12px; font-family: var(--font-sans);
+  cursor: pointer; transition: all .15s;
+}
+.btn-secondary:hover { border-color: var(--text-3); color: var(--text); }
+
+/* ── AUTH SCREENS ───────────────────────────────────────── */
+.auth-page {
+  min-height: 500px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.auth-panel-left {
+  background: var(--navy);
+  padding: 40px 40px;
+  display: flex; flex-direction: column;
+  justify-content: center;
+  position: relative; overflow: hidden;
+}
+.auth-panel-left::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 80% at 0% 100%, rgba(30,95,168,.5) 0%, transparent 60%);
+}
+.auth-brand { font-family: var(--font-serif); font-size: 28px; font-style: italic; color: var(--white); margin-bottom: 24px; position: relative; }
+.auth-brand-sub { font-family: var(--font-mono); font-size: 10px; letter-spacing: .12em; color: rgba(255,255,255,.3); text-transform: uppercase; display: block; margin-top: 2px; }
+.auth-headline { font-family: var(--font-serif); font-size: 22px; font-weight: 500; color: var(--white); line-height: 1.4; margin-bottom: 12px; position: relative; }
+.auth-headline em { font-style: italic; color: var(--sky-deep); }
+.auth-tagline { font-size: 13px; color: rgba(255,255,255,.4); line-height: 1.6; position: relative; }
+.auth-features { margin-top: 28px; position: relative; }
+.auth-feat { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; }
+.auth-feat-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--sky-deep); margin-top: 5px; flex-shrink: 0; }
+.auth-feat-text { font-size: 12px; color: rgba(255,255,255,.5); line-height: 1.4; }
+
+.auth-panel-right {
+  background: var(--cream);
+  padding: 40px 36px;
+  display: flex; flex-direction: column; justify-content: center;
+}
+.auth-form-title { font-family: var(--font-serif); font-size: 22px; font-weight: 500; color: var(--navy); margin-bottom: 4px; }
+.auth-form-sub { font-size: 13px; color: var(--text-3); margin-bottom: 24px; }
+.auth-form-sub a { color: var(--blue); text-decoration: none; }
+.auth-divider { text-align: center; font-size: 11px; color: var(--text-4); margin: 14px 0; position: relative; }
+.auth-divider::before { content: ''; position: absolute; left: 0; top: 50%; width: 100%; height: 1px; background: var(--border); }
+.auth-divider span { background: var(--cream); padding: 0 10px; position: relative; }
+.auth-footer { text-align: center; font-size: 12px; color: var(--text-3); margin-top: 16px; }
+.auth-footer a { color: var(--blue); text-decoration: none; }
+.form-input-auth {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  font-family: var(--font-sans); font-size: 13px; color: var(--text);
+  background: var(--white); outline: none;
+  transition: border-color .15s;
+  margin-top: 6px;
+}
+.form-input-auth:focus { border-color: var(--blue); }
+.form-label-auth { font-size: 12px; font-weight: 500; color: var(--text); display: block; }
+.form-group-auth { margin-bottom: 14px; }
+.btn-full {
+  width: 100%; padding: 11px;
+  background: var(--navy); color: var(--white);
+  border: none; border-radius: var(--radius);
+  font-size: 13px; font-weight: 500;
+  font-family: var(--font-sans); cursor: pointer;
+  transition: background .15s; margin-top: 8px;
+}
+.btn-full:hover { background: var(--navy-light); }
+.form-hint { font-size: 11px; color: var(--text-4); margin-top: 4px; }
+.forgot-link { font-size: 11px; color: var(--blue); text-decoration: none; float: right; margin-top: 2px; }
+.checkbox-row { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
+.checkbox-row input { margin-top: 2px; }
+.checkbox-row span { font-size: 12px; color: var(--text-3); line-height: 1.4; }
+.checkbox-row a { color: var(--blue); }
+
+/* ── SEARCH RESULTS ─────────────────────────────────────── */
+.search-hero {
+  background: var(--white);
+  border-bottom: 1px solid var(--border-soft);
+  padding: 20px 28px;
+}
+.search-hero-bar { display: flex; gap: 10px; align-items: center; }
+.search-input-lg {
+  flex: 1; max-width: 500px;
+  height: 40px;
+  border: 1.5px solid var(--blue);
+  border-radius: 20px;
+  padding: 0 16px;
+  font-family: var(--font-sans); font-size: 13px; color: var(--text);
+  background: var(--cream); outline: none;
+}
+.search-filters { display: flex; gap: 6px; margin-top: 12px; }
+.filter-btn {
+  font-size: 11px; padding: 4px 12px;
+  border-radius: 14px; border: 1px solid var(--border);
+  background: none; color: var(--text-3); cursor: pointer;
+}
+.filter-btn.on { background: var(--navy); color: var(--white); border-color: var(--navy); }
+.search-results-count { font-family: var(--font-mono); font-size: 11px; color: var(--text-4); margin-top: 8px; }
+
+.search-body { padding: 20px 28px; display: grid; grid-template-columns: 1fr 220px; gap: 24px; }
+.search-section-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--text-3); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border-soft); }
+.search-subject-result {
+  background: var(--white); border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg); padding: 12px 16px;
+  margin-bottom: 8px; cursor: pointer; box-shadow: var(--shadow);
+  display: flex; align-items: center; gap: 12px;
+}
+.ssr-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--sky); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+.ssr-title { font-family: var(--font-serif); font-size: 13px; font-weight: 500; color: var(--navy); }
+.ssr-count { font-family: var(--font-mono); font-size: 10px; color: var(--text-4); }
+.search-suggestions { margin-top: 8px; }
+.ss-tag { display: inline-block; font-size: 11px; color: var(--blue); background: var(--sky); padding: 3px 10px; border-radius: 12px; margin: 3px 3px 3px 0; cursor: pointer; border: 1px solid var(--sky-mid); }
+
+/* ── PROFILE ────────────────────────────────────────────── */
+.profile-hero {
+  background: linear-gradient(135deg, var(--navy) 0%, #162D50 100%);
+  padding: 32px 28px 24px;
+  display: flex; align-items: flex-end; gap: 20px;
+}
+.profile-avatar-lg {
+  width: 64px; height: 64px; border-radius: 50%;
+  background: var(--blue);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-serif); font-size: 24px; font-style: italic;
+  color: var(--white); font-weight: 600; flex-shrink: 0;
+  border: 3px solid rgba(255,255,255,.2);
+}
+.profile-info { flex: 1; }
+.profile-name { font-family: var(--font-serif); font-size: 22px; font-weight: 500; color: var(--white); margin-bottom: 3px; }
+.profile-handle { font-family: var(--font-mono); font-size: 11px; color: rgba(255,255,255,.4); }
+.profile-bio { font-size: 13px; color: rgba(255,255,255,.6); margin-top: 6px; line-height: 1.5; }
+.profile-stats { display: flex; gap: 20px; }
+.ps-item { text-align: right; }
+.ps-val { font-family: var(--font-mono); font-size: 16px; font-weight: 500; color: var(--white); }
+.ps-label { font-size: 10px; color: rgba(255,255,255,.3); }
+.btn-edit-profile {
+  background: rgba(255,255,255,.1); color: var(--white);
+  border: 1px solid rgba(255,255,255,.15); padding: 6px 14px;
+  border-radius: 20px; font-size: 12px; cursor: pointer;
+  font-family: var(--font-sans); transition: background .15s;
+  align-self: flex-start;
+}
+.btn-edit-profile:hover { background: rgba(255,255,255,.15); }
+.profile-body { padding: 20px 28px; display: grid; grid-template-columns: 1fr 240px; gap: 24px; }
+.profile-tab-bar { display: flex; gap: 0; border-bottom: 1px solid var(--border-soft); margin-bottom: 16px; }
+.ptab {
+  font-size: 12px; font-weight: 500; color: var(--text-3);
+  padding: 8px 16px; cursor: pointer;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+}
+.ptab.on { color: var(--navy); border-bottom-color: var(--navy); }
+
+/* ── ADMIN SCREENS ──────────────────────────────────────── */
+.admin-layout { display: grid; grid-template-columns: 180px 1fr; min-height: 500px; }
+.admin-sidebar {
+  background: #F4F2EE;
+  border-right: 1px solid var(--border-soft);
+  padding: 20px 0;
+}
+.admin-sidebar-title { font-family: var(--font-mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--text-4); padding: 0 16px 8px; }
+.admin-nav-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 16px; font-size: 12px; color: var(--text-2);
+  cursor: pointer; transition: background .15s; border-left: 2px solid transparent;
+}
+.admin-nav-item:hover { background: rgba(0,0,0,.04); }
+.admin-nav-item.on { color: var(--navy); font-weight: 500; border-left-color: var(--navy); background: rgba(15,39,68,.04); }
+.admin-nav-icon { font-size: 14px; }
+.admin-badge { background: var(--red); color: var(--white); font-family: var(--font-mono); font-size: 9px; padding: 1px 5px; border-radius: 8px; margin-left: auto; }
+
+.admin-main { padding: 24px 24px; }
+.admin-page-title { font-family: var(--font-serif); font-size: 18px; font-weight: 500; color: var(--navy); margin-bottom: 4px; }
+.admin-page-sub { font-size: 12px; color: var(--text-3); margin-bottom: 20px; }
+
+.report-card {
+  background: var(--white);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+  margin-bottom: 10px;
+  box-shadow: var(--shadow);
+}
+.report-card.urgent { border-left: 3px solid var(--red); }
+.rc-header { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
+.rc-type-badge {
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: .05em;
+  text-transform: uppercase; padding: 2px 7px; border-radius: 10px;
+  flex-shrink: 0; margin-top: 1px;
+}
+.badge-disc { background: var(--sky); color: var(--navy-light); }
+.badge-resp { background: #EEF0FF; color: #3040A0; }
+.rc-content-preview { font-size: 12px; color: var(--text-2); line-height: 1.5; flex: 1; }
+.rc-meta-row { display: flex; gap: 16px; margin-bottom: 12px; }
+.rc-meta-item { }
+.rc-meta-label { font-family: var(--font-mono); font-size: 9px; color: var(--text-4); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 2px; }
+.rc-meta-val { font-size: 12px; color: var(--text-2); }
+.rc-reason-box {
+  background: var(--amber-bg);
+  border: 1px solid #E8D0A0;
+  border-radius: var(--radius);
+  padding: 8px 12px;
+  font-size: 12px; color: var(--amber);
+  margin-bottom: 12px;
+}
+.rc-actions-row { display: flex; gap: 8px; justify-content: flex-end; }
+.action-btn {
+  font-family: var(--font-sans); font-size: 11px; font-weight: 500;
+  padding: 5px 14px; border-radius: 14px; cursor: pointer;
+  transition: all .15s; border: 1px solid;
+}
+.btn-dismiss { color: var(--text-3); border-color: var(--border); background: none; }
+.btn-dismiss:hover { background: var(--cream-dark); }
+.btn-remove { color: var(--red); border-color: #E8B8B8; background: var(--red-bg); }
+.btn-remove:hover { background: #F0D0D0; }
+.btn-lock { color: var(--amber); border-color: #E8D0A0; background: var(--amber-bg); }
+.btn-lock:hover { background: #F0E0C0; }
+.btn-suspend { color: var(--navy); border-color: var(--sky-mid); background: var(--sky); }
+.btn-suspend:hover { background: var(--sky-mid); }
+
+.admin-subject-card {
+  background: var(--white);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  display: flex; align-items: center; gap: 12px;
+  box-shadow: var(--shadow);
+}
+.asc-info { flex: 1; }
+.asc-title { font-family: var(--font-serif); font-size: 13px; font-weight: 500; color: var(--navy); margin-bottom: 2px; }
+.asc-slug { font-family: var(--font-mono); font-size: 10px; color: var(--text-4); }
+.asc-count { font-family: var(--font-mono); font-size: 11px; color: var(--text-3); flex-shrink: 0; }
+.asc-actions { display: flex; gap: 6px; }
+.asc-btn { font-size: 10px; padding: 3px 10px; border-radius: 10px; border: 1px solid var(--border); background: none; color: var(--text-3); cursor: pointer; font-family: var(--font-sans); }
+.asc-btn:hover { background: var(--cream-dark); }
+.status-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-top: 2px; }
+.status-active { background: #28A065; }
+.status-archived { background: var(--text-4); }
+.btn-create-subject {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--navy); color: var(--white);
+  border: none; padding: 8px 16px; border-radius: 20px;
+  font-size: 12px; font-weight: 500; font-family: var(--font-sans);
+  cursor: pointer; margin-bottom: 16px; transition: background .15s;
+}
+.btn-create-subject:hover { background: var(--navy-light); }
+
+/* ── PAGINATION ─────────────────────────────────────────── */
+.pagination { display: flex; align-items: center; justify-content: center; gap: 4px; padding: 20px 0; }
+.page-btn {
+  width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
+  border-radius: 6px; border: 1px solid var(--border);
+  font-family: var(--font-mono); font-size: 11px; color: var(--text-3);
+  cursor: pointer; background: var(--white); transition: all .15s;
+}
+.page-btn:hover { border-color: var(--navy); color: var(--navy); }
+.page-btn.on { background: var(--navy); color: var(--white); border-color: var(--navy); }
+.page-btn.arr { font-size: 13px; }
+</style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ──────────────────────────────────────────────────────── -->
+<nav class="sidebar">
+  <div class="sidebar-logo">Cogitons <span>V1 UI Mockup — All Screens</span></div>
+  <div class="sidebar-section">Public</div>
+  <button class="nav-btn active" onclick="show('home',this)">01 · Home</button>
+  <button class="nav-btn" onclick="show('subjects',this)">02 · Subjects list</button>
+  <button class="nav-btn" onclick="show('subject',this)">03 · Subject detail</button>
+  <button class="nav-btn" onclick="show('thread',this)">04 · Discussion thread</button>
+  <button class="nav-btn" onclick="show('search',this)">05 · Search results</button>
+  <div class="sidebar-section">Auth</div>
+  <button class="nav-btn" onclick="show('login',this)">06 · Login</button>
+  <button class="nav-btn" onclick="show('signup',this)">07 · Sign up</button>
+  <div class="sidebar-section">Authenticated</div>
+  <button class="nav-btn" onclick="show('create',this)">08 · Create discussion</button>
+  <button class="nav-btn" onclick="show('profile',this)">09 · Profile</button>
+  <div class="sidebar-section">Admin</div>
+  <button class="nav-btn" onclick="show('admin-reports',this)">10 · Admin · Reports</button>
+  <button class="nav-btn" onclick="show('admin-subjects',this)">11 · Admin · Subjects</button>
+</nav>
+
+<!-- ── CANVAS ───────────────────────────────────────────────────────── -->
+<div class="canvas">
+
+<!-- 01 HOME ──────────────────────────────────────────────────────── -->
+<div class="screen active" id="s-home">
+<div class="screen-label">01 · Home page</div>
+<div class="browser">
+  <div class="browser-bar"><div class="browser-dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="browser-url">cogitons.com</div></div>
+  <div class="page">
+    <nav class="app-nav">
+      <div class="app-nav-logo">Cogitons</div>
+      <div class="app-nav-links">
+        <span class="nav-link active">Home</span>
+        <span class="nav-link">Subjects</span>
+        <button class="btn-signup">Sign up</button>
+        <span class="nav-link">Log in</span>
+      </div>
+    </nav>
+    <div class="home-hero">
+      <div class="hero-eyebrow">Knowledge · Discussion · Community</div>
+      <div class="hero-title">Come to understand a subject<br>through <em>community insight.</em></div>
+      <div class="hero-sub">A structured alternative to noisy social media — every discussion organized under a subject, every insight searchable and reusable.</div>
+      <div class="hero-search">
+        <input type="text" placeholder="Search subjects, discussions, ideas…" readonly>
+        <button class="hero-search-btn">Search</button>
+      </div>
+    </div>
+    <div class="home-body">
+      <div>
+        <div class="section-title">Browse subjects</div>
+        <div class="subject-grid">
+          <div class="subject-card" onclick="show('subject',null)">
+            <div class="sc-header"><div class="sc-title">Studying Abroad</div><div class="sc-count">42 discussions</div></div>
+            <div class="sc-desc">Visas, scholarships, applications, and real experiences from those who've done it.</div>
+          </div>
+          <div class="subject-card">
+            <div class="sc-header"><div class="sc-title">Entrepreneurship in Cameroon</div><div class="sc-count">37 discussions</div></div>
+            <div class="sc-desc">Starting a business, funding, regulations, and growing in the local market.</div>
+          </div>
+          <div class="subject-card">
+            <div class="sc-header"><div class="sc-title">Career Advice</div><div class="sc-count">29 discussions</div></div>
+            <div class="sc-desc">CVs, interviews, salary negotiation, and navigating professional life.</div>
+          </div>
+          <div class="subject-card">
+            <div class="sc-header"><div class="sc-title">Tech & Software Development</div><div class="sc-count">24 discussions</div></div>
+            <div class="sc-desc">Learning to code, freelancing, and building software in Africa.</div>
+          </div>
+        </div>
+        <div class="section-title">Recent discussions</div>
+        <div class="feed-item" onclick="show('thread',null)">
+          <div class="fi-subject">Studying Abroad</div>
+          <div class="fi-title">What documents do I need for a German student visa from Cameroon?</div>
+          <div class="fi-body">I've been accepted to a university in Berlin and I'm beginning the visa process. I've heard it's very document-heavy…</div>
+          <div class="fi-meta">
+            <div class="fi-author"><div class="fi-avatar av-1">NK</div><span class="fi-name">Nadia K.</span></div>
+            <span class="fi-useful">✓ 14 useful</span>
+            <span class="fi-replies">8 responses</span>
+            <span class="fi-time">2h ago</span>
+          </div>
+        </div>
+        <div class="feed-item">
+          <div class="fi-subject">Entrepreneurship in Cameroon</div>
+          <div class="fi-title">Best banks for a small business account in Douala?</div>
+          <div class="fi-body">Starting a small import business and need to open a business account. Looking for recommendations based on actual experience…</div>
+          <div class="fi-meta">
+            <div class="fi-author"><div class="fi-avatar av-2">JM</div><span class="fi-name">Jean-Marc T.</span></div>
+            <span class="fi-useful">✓ 9 useful</span>
+            <span class="fi-replies">5 responses</span>
+            <span class="fi-time">5h ago</span>
+          </div>
+        </div>
+        <div class="feed-item">
+          <div class="fi-subject">Career Advice</div>
+          <div class="fi-title">Is a computer science degree still worth it in 2026?</div>
+          <div class="fi-body">With all the bootcamps and online resources available, I'm wondering whether investing 3–4 years in a CS degree is the right move…</div>
+          <div class="fi-meta">
+            <div class="fi-author"><div class="fi-avatar av-3">AC</div><span class="fi-name">Armelle C.</span></div>
+            <span class="fi-useful">✓ 21 useful</span>
+            <span class="fi-replies">13 responses</span>
+            <span class="fi-time">1d ago</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="widget">
+          <div class="widget-title">Platform</div>
+          <div class="stat-row"><span class="stat-label">Active subjects</span><span class="stat-val">12</span></div>
+          <div class="stat-row"><span class="stat-label">Discussions</span><span class="stat-val">189</span></div>
+          <div class="stat-row"><span class="stat-label">Members</span><span class="stat-val">83</span></div>
+        </div>
+        <div class="widget">
+          <div class="widget-title">Most useful this week</div>
+          <div class="recent-item"><div class="ri-text">"Fully funded scholarships open to Cameroonians in 2026"</div><div class="ri-meta">Studying Abroad · ✓ 38</div></div>
+          <div class="recent-item"><div class="ri-text">"How I got my first freelance client as a developer"</div><div class="ri-meta">Tech & Dev · ✓ 26</div></div>
+          <div class="recent-item"><div class="ri-text">"France vs Germany vs Canada — a real comparison"</div><div class="ri-meta">Studying Abroad · ✓ 22</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- 02 SUBJECTS LIST ───────────────────────────────────────────────── -->
+<div class="screen" id="s-subjects">
+<div class="screen-label">02 · Subjects list</div>
+<div class="browser">
+  <div class="browser-bar"><div class="browser-dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="browser-url">cogitons.com/subjects</div></div>
+  <div class="page">
+    <nav class="app-nav">
+      <div class="app-nav-logo">Cogitons</div>
+      <div class="app-nav-search"><span class="search-icon">⌕</span><input type="text" placeholder="Search subjects…" readonly></div>
+      <div class="app-nav-links"><span class="nav-link">Home</span><span class="nav-link active">Subjects</span><button class="btn-signup">Sign up</button><span class="nav-link">Log in</span></div>
+    </nav>
+    <div class="page-header">
+      <div class="page-header-title">All Subjects</div>
+      <div class="page-header-sub">12 active subjects · organized knowledge areas</div>
+    </div>
+    <div class="subjects-grid">
+      <div class="subject-card-lg" onclick="show('subject',null)"><div class="scl-num">01</div><div class="scl-title">Studying Abroad</div><div class="scl-desc">Visas, scholarships, applications, and life experiences from Cameroonians studying outside the country.</div><div class="scl-footer"><div class="scl-count">42 discussions · 134 responses</div><div class="scl-arrow">→</div></div></div>
+      <div class="subject-card-lg"><div class="scl-num">02</div><div class="scl-title">Entrepreneurship in Cameroon</div><div class="scl-desc">Starting a business, funding, navigating regulations, and growing in the local market.</div><div class="scl-footer"><div class="scl-count">37 discussions · 98 responses</div><div class="scl-arrow">→</div></div></div>
+      <div class="subject-card-lg"><div class="scl-num">03</div><div class="scl-title">Career Advice</div><div class="scl-desc">CVs, interviews, salary negotiation, and navigating the professional landscape.</div><div class="scl-footer"><div class="scl-count">29 discussions · 77 responses</div><div class="scl-arrow">→</div></div></div>
+      <div class="subject-card-lg"><div class="scl-num">04</div><div class="scl-title">Tech & Software Development</div><div class="scl-desc">Learning to code, career paths in tech, freelancing, and building software in Africa.</div><div class="scl-footer"><div class="scl-count">24 discussions · 61 responses</div><div class="scl-arrow">→</div></div></div>
+      <div class="subject-card-lg"><div class="scl-num">05</div><div class="scl-title">Health & Wellbeing</div><div class="scl-desc">Physical and mental health, healthcare access, and wellness resources in Cameroon.</div><div class="scl-footer"><div class="scl-count">18 discussions · 44 responses</div><div class="scl-arrow">→</div></div></div>
+      <div class="subject-card-lg"><div class="scl-num">06</div><div class="scl-title">Finance & Money</div><div class="scl-desc">Personal finance, savings, investing, and navigating financial services in Cameroon.</div><div class="scl-footer"><div class="scl-count">15 discussions · 38 responses</div><div class="scl-arrow">→</div></div></div>
+    </div>
+    <div class="pagination">
+      <button class="page-btn arr on">←</button>
+      <button class="page-btn on">1</button>
+      <button class="page-btn">2</button>
+      <button class="page-btn arr">→</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- 03 SUBJECT DETAIL ──────────────────────────────────────────────── -->
+<div class="screen" id="s-subject">
+<div class="screen-label">03 · Subject detail page</div>
+<div class="browser">
+  <div class="browser-bar"><div class="browser-dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="browser-url">cogitons.com/subjects/studying-abroad</div></div>
+  <div class="page">
+    <nav class="app-nav">
+      <div class="app-nav-logo">Cogitons</div>
+      <div class="app-nav-search"><span class="search-icon">⌕</span><input type="text" placeholder="Search…" readonly></div>
+      <div class="app-nav-links"><span class="nav-link">Home</span><span class="nav-link active">Subjects</span><div class="nav-avatar">NK</div></div>
+    </nav>
+    <div class="subject-hero">
+      <div class="subject-breadcrumb" onclick="show('subjects',null)">← All subjects</div>
+      <div class="subject-hero-title">Studying Abroad</div>
+      <div class="subject-hero-desc">Visas, scholarships, applications, and real experiences from Cameroonians who studied or are studying outside the country.</div>
+      <div class="subject-hero-bar">
+        <div class="subject-stats">
+          <div class="ss-item"><div class="ss-val">42</div><div class="ss-label">discussions</div></div>
+          <div class="ss-item"><div class="ss-val">134</div><div class="ss-label">responses</div></div>
+          <div class="ss-item"><div class="ss-val">67</div><div class="ss-label">contributors</div></div>
+        </div>
+        <button class="btn-primary" onclick="show('create',null)">+ Start a discussion</button>
+      </div>
+    </div>
+    <div class="disc-controls">
+      <span class="disc-count">42 discussions</span>
+      <div class="sort-group">
+        <button class="sort-btn on">Recent</button>
+        <button class="sort-btn">Most useful</button>
+      </div>
+    </div>
+    <div class="disc-list">
+      <div class="disc-card" onclick="show('thread',null)">
+        <div class="dc-top"><div class="dc-avatar av-1">NK</div><span class="dc-name">Nadia K.</span><span class="dc-time">2h ago</span></div>
+        <div class="dc-title">What documents do I need for a German student visa from Cameroon?</div>
+        <div class="dc-preview">I've been accepted to a university in Berlin starting this October and I'm beginning the visa process. I've heard it's very document-heavy…</div>
+        <div class="dc-footer"><button class="useful-pill on"><span class="check">✓</span> Useful · 14</button><span class="replies-count">💬 8 responses</span></div>
+      </div>
+      <div class="disc-card">
+        <div class="dc-top"><div class="dc-avatar av-2">DM</div><span class="dc-name">Daniel M.</span><span class="dc-time">1d ago</span></div>
+        <div class="dc-title">Fully funded scholarships open to Cameroonian students in 2026</div>
+        <div class="dc-preview">I've compiled a list of scholarships with open applications this year. Chevening, Eiffel, DAAD, and some lesser-known ones…</div>
+        <div class="dc-footer"><button class="useful-pill on"><span class="check">✓</span> Useful · 38</button><span class="replies-count">💬 21 responses</span></div>
+      </div>
+      <div class="disc-card">
+        <div class="dc-top"><div class="dc-avatar av-3">AJ</div><span class="dc-name">Amara J.</span><span class="dc-time">3d ago</span></div>
+        <div class="dc-title">France vs Germany vs Canada — which is best for a Cameroonian student?</div>
+        <div class="dc-preview">Finishing my licence and trying to decide where to apply. Language isn't a barrier for any of these. Looking for practical advice on cost, work rights…</div>
+        <div class="dc-footer"><button class="useful-pill"><span class="check">✓</span> Useful · 22</button><span class="replies-count">💬 15 responses</span></div>
+      </div>
+      <div class="disc-card">
+        <div class="dc-top"><div class="dc-avatar av-4">BF</div><span class="dc-name">Brigitte F.</span><span class="dc-time">5d ago</span></div>
+        <div class="dc-title">How long did your Schengen visa application take from Yaoundé?</div>
+        <div class="dc-preview">Applied 3 months ago and still waiting. Starting to worry it won't come in time for the semester. Anyone with recent experience?</div>
+        <div class="dc-footer"><button class="useful-pill"><span class="check">✓</span> Useful · 11</button><span class="replies-count">💬 9 responses</span></div>
+      </div>
+    </div>
+    <div class="pagination"><button class="page-btn arr on">←</button><button class="page-btn on">1</button><button class="page-btn">2</button><button class="page-btn">3</button><button class="page-btn arr">→</button></div>
+  </div>
+</div>
+</div>
+
+<!-- 04 DISCUSSION THREAD ───────────────────────────────────────────── -->
+<div class="screen" id="s-thread">
+<div class="screen-label">04 · Discussion thread</div>
+<div class="browser">
+  <div class="browser-bar"><div class="browser-dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="browser-url">cogitons.com/discussions/german-student-visa</div></div>
+  <div class="page">
+    <nav class="app-nav">
+      <div class="app-nav-logo">Cogitons</div>
+      <div class="app-nav-search"><span class="search-icon">⌕</span><input type="text" placeholder="Search…" readonly></div>
+      <div class="app-nav-links"><span class="nav-link">Home</span><span class="nav-link">Subjects</span><div class="nav-avatar">NK</div></div>
+    </nav>
+    <div class="thread-container">
+      <div class="thread-main">
+        <div class="thread-op">
+          <div class="thread-breadcrumb" onclick="show('subject',null)">← Studying Abroad</div>
+          <div class="thread-title">What documents do I need for a German student visa from Cameroon?</div>
+          <div class="thread-meta">
+            <div class="dc-avatar av-1" style="width:28px;height:28px;font-size:10px">NK</div>
+            <span style="font-size:12px;font-weight:500;color:var(--text-2)">Nadia K.</span>
+            <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-4)">Posted 2 hours ago</span>
+          </div>
+          <div class="thread-body">I've been accepted to a university in Berlin starting this October and I'm now beginning the visa application process. I've heard the German student visa is very document-heavy and some people get rejected for small mistakes. I want to make sure I don't miss anything important. Has anyone done this recently from Cameroon? What was the process like and what exactly do you need to bring?</div>
+          <div class="thread-actions">
+            <button class="useful-pill"><span class="check">✓</span> Mark as useful · 14</button>
+            <button class="report-btn">🚩 Report</button>
+          </div>
+        </div>
+        <div class="responses-header">8 responses</div>
+        <div class="response-card top-answer">
+          <div class="rc-meta"><div class="dc-avatar av-2" style="width:24px;height:24px;font-size:9px">DM</div><span style="font-size:12px;font-weight:500;color:var(--text-2)">Daniel M.</span><span class="top-badge">✓ Most useful</span><span style="font-family:var(--font-mono);font-size:10px;color:var(--text-4);margin-left:auto">1h ago</span></div>
+          <div class="rc-body">Done this in 2024 from Yaoundé. You'll need: (1) university admission letter, (2) proof of financial means — either a blocked account of €11,208 or a scholarship letter, (3) health insurance valid for Germany, (4) passport valid at least 6 months beyond your intended stay, (5) certified academic transcripts, (6) motivation letter in German or English. Book your embassy appointment as early as possible — Yaoundé is typically booked out 6–8 weeks in advance. Start the blocked account process immediately if you're going that route.</div>
+          <div class="rc-actions"><button class="useful-pill on"><span class="check">✓</span> Useful · 29</button><button class="report-btn">🚩 Report</button></div>
+        </div>
+        <div class="response-card">
+          <div class="rc-meta"><div class="dc-avatar av-3" style="width:24px;height:24px;font-size:9px">AJ</div><span style="font-size:12px;font-weight:500;color:var(--text-2)">Amara J.</span><span style="font-family:var(--font-mono);font-size:10px;color:var(--text-4);margin-left:auto">45min ago</span></div>
+          <div class="rc-body">Adding to Daniel's answer — make sure all your documents are translated to German or English by a certified translator if they're originally in French. The embassy is strict about this. Also bring extra copies of everything on the day of your appointment, not just originals. They sometimes keep copies.</div>
+          <div class="rc-actions"><button class="useful-pill"><span class="check">✓</span> Useful · 11</button><button class="report-btn">🚩 Report</button><span class="edited-label">edited</span></div>
+        </div>
+        <div class="response-card">
+          <div class="rc-meta"><div class="dc-avatar av-4" style="width:24px;height:24px;font-size:9px">BF</div><span style="font-size:12px;font-weight:500;color:var(--text-2)">Brigitte F.</span><span style="font-family:var(--font-mono);font-size:10px;color:var(--text-4);margin-left:auto">20min ago</span></div>
+          <div class="rc-body">One thing I wish someone had told me: the blocked account (Sperrkonto) with Deutsche Bank takes 2–3 weeks to set up and requires a fee. Don't leave this to the last minute. Fintiba and Expatrio are alternatives that are faster and popular with students.</div>
+          <div class="rc-actions"><button class="useful-pill"><span class="check">✓</span> Useful · 7</button><button class="report-btn">🚩 Report</button></div>
+        </div>
+        <div class="reply-box">
+          <div class="reply-box-title">Add your response</div>
+          <textarea class="reply-textarea" placeholder="Share your experience or knowledge on this topic…"></textarea>
+          <div class="reply-footer"><button class="btn-primary">Post response</button></div>
+        </div>
+      </div>
+      <div class="thread-sidebar">
+        <div class="thread-widget">
+          <div class="tw-title">Subject</div>
+          <div class="tw-subject" onclick="show('subject',null)" style="cursor:pointer">Studying Abroad →</div>
+          <div class="tw-desc" style="margin-top:6px">Visas, scholarships, and experiences from Cameroonians studying abroad.</div>
+        </div>
+        <div class="thread-widget">
+          <div class="tw-title">Thread stats</div>
+          <div class="stat-row"><span class="stat-label">Responses</span><span class="stat-val">8</span></div>
+          <div class="stat-row"><span class="stat-label">Useful votes</span><span class="stat-val">14</span></div>
+          <div class="stat-row"><span class="stat-label">Posted</span><span class="stat-val" style="font-size:11px">2h ago</span></div>
+        </div>
+        <div class="thread-widget">
+          <div class="tw-title">Related discussions</div>
+          <div class="recent-item"><div class="ri-text">Schengen visa timeline from Yaoundé?</div><div class="ri-meta">Studying Abroad</div></div>
+          <div class="recent-item"><div class="ri-text">France vs Germany vs Canada comparison</div><div class="ri-meta">Studying Abroad</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- 05 SEARCH ──────────────────────────────────────────────────────── -->
+<div class="screen" id="s-search">
+<div class="screen-label">05 · Search results</div>
+<div class="browser">
+  <div class="browser-bar"><div class="browser-dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="browser-url">cogitons.com/search?q=visa+cameroon</div></div>
+  <div class="page">
+    <nav class="app-nav"><div class="app-nav-logo">Cogitons</div><div class="app-nav-links"><span class="nav-link">Home</span><span class="nav-link">Subjects</span><button class="btn-signup">Sign up</button><span class="nav-link">Log in</span></div></nav>
+    <div class="search-hero">
+      <div class="search-hero-bar">
+        <input class="search-input-lg" type="text" value="visa cameroon" readonly>
+        <button class="btn-primary">Search</button>
+      </div>
+      <div class="search-filters">
+        <button class="filter-btn on">All</button>
+        <button class="filter-btn">Subjects</button>
+        <button class="filter-btn">Discussions</button>
+      </div>
+      <div class="search-results-count">14 results for "visa cameroon"</div>
+    </div>
+    <div class="search-body">
+      <div>
+        <div class="search-section-label" style="margin-bottom:10px">Subjects (1)</div>
+        <div class="search-subject-result" onclick="show('subject',null)"><div class="ssr-icon">📚</div><div><div class="ssr-title">Studying Abroad</div><div class="ssr-count">42 discussions</div></div></div>
+        <div style="margin-top:16px"></div>
+        <div class="search-section-label">Discussions (13)</div>
+        <div class="disc-card" style="margin-top:10px" onclick="show('thread',null)">
+          <div class="fi-subject">Studying Abroad</div>
+          <div class="dc-title">What documents do I need for a German student visa from Cameroon?</div>
+          <div class="dc-preview">…the German student visa process from Cameroon requires specific documents including university admission letter, blocked account proof…</div>
+          <div class="dc-footer"><button class="useful-pill on"><span class="check">✓</span> Useful · 14</button><span class="replies-count">💬 8 responses</span><span class="fi-time" style="margin-left:auto">2h ago</span></div>
+        </div>
+        <div class="disc-card">
+          <div class="fi-subject">Studying Abroad</div>
+          <div class="dc-title">How long did your Schengen visa application take from Yaoundé?</div>
+          <div class="dc-preview">…my Schengen visa application in Cameroon took longer than expected. The embassy in Yaoundé has limited appointment slots…</div>
+          <div class="dc-footer"><button class="useful-pill"><span class="check">✓</span> Useful · 11</button><span class="replies-count">💬 9 responses</span><span class="fi-time" style="margin-left:auto">5d ago</span></div>
+        </div>
+        <div class="disc-card">
+          <div class="fi-subject">Studying Abroad</div>
+          <div class="dc-title">Tips for the visa interview at the French consulate Cameroon</div>
+          <div class="dc-preview">…had my visa interview in Douala last month. They focus heavily on your financial means and ties to Cameroon…</div>
+          <div class="dc-footer"><button class="useful-pill"><span class="check">✓</span> Useful · 8</button><span class="replies-count">💬 6 responses</span><span class="fi-time" style="margin-left:auto">1w ago</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="widget">
+          <div class="widget-title">Try also</div>
+          <div class="search-suggestions">
+            <span class="ss-tag">studying abroad</span>
+            <span class="ss-tag">DAAD scholarship</span>
+            <span class="ss-tag">Germany</span>
+            <span class="ss-tag">Schengen</span>
+            <span class="ss-tag">French consulate</span>
+          </div>
+        </div>
+        <div class="widget">
+          <div class="widget-title">Related subjects</div>
+          <div class="recent-item"><div class="ri-text" onclick="show('subject',null)">Studying Abroad</div><div class="ri-meta">42 discussions</div></div>
+          <div class="recent-item"><div class="ri-text">Career Advice</div><div class="ri-meta">29 discussions</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- 06 LOGIN ───────────────────────────────────────────────────────── -->
+<div class="screen" id="s-login">
+<div class="screen-label">06 · Login</div>
+<div class="browser">
+  <div class="browser-bar"><div class="browser-dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="browser-url">cogitons.com/login</div></div>
+  <div class="page">
+    <div class="auth-page">
+      <div class="auth-panel-left">
+        <div class="auth-brand">Cogitons <span class="auth-brand-sub">Knowledge · Discussion</span></div>
+        <div class="auth-headline">Come to understand a subject through <em>community insight.</em></div>
+        <div class="auth-tagline">A structured platform for organized, searchable knowledge discussion — built for Cameroonian students and professionals.</div>
+        <div class="auth-features">
+          <div class="auth-feat"><div class="auth-feat-dot"></div><div class="auth-feat-text">Browse and search organized subjects</div></div>
+          <div class="auth-feat"><div class="auth-feat-dot"></div><div class="auth-feat-text">Contribute to discussions that build knowledge over time</div></div>
+          <div class="auth-feat"><div class="auth-feat-dot"></div><div class="auth-feat-text">Surface the best answers with useful votes</div></div>
+        </div>
+      </div>
+      <div class="auth-panel-right">
+        <div class="auth-form-title">Welcome back</div>
+        <div class="auth-form-sub">Don't have an account? <a onclick="show('signup',null)" style="cursor:pointer">Sign up free</a></div>
+        <div class="form-group-auth">
+          <label class="form-label-auth">Email address</label>
+          <input class="form-input-auth" type="email" placeholder="you@example.com" readonly>
+        </div>
+        <div class="form-group-auth">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <label class="form-label-auth">Password</label>
+            <a class="forgot-link" style="float:none">Forgot password?</a>
+          </div>
+          <input class="form-input-auth" type="password" placeholder="••••••••" readonly>
+        </div>
+        <button class="btn-full">Log in</button>
+        <div class="auth-footer">New to Cogitons? <a onclick="show('signup',null)" style="cursor:pointer">Create an account</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- 07 SIGNUP ──────────────────────────────────────────────────────── -->
+<div class="screen" id="s-signup">
+<div class="screen-label">07 · Sign up</div>
+<div class="browser">
+  <div class="browser-bar"><div class="browser-dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="browser-url">cogitons.com/signup</div></div>
+  <div class="page">
+    <div class="auth-page">
+      <div class="auth-panel-left">
+        <div class="auth-brand">Cogitons <span class="auth-brand-sub">Knowledge · Discussion</span></div>
+        <div class="auth-headline">Join a community that builds knowledge, not just <em>noise.</em></div>
+        <div class="auth-tagline">Create an account to start discussions, share insights, and contribute to organized knowledge under the subjects that matter to you.</div>
+        <div class="auth-features">
+          <div class="auth-feat"><div class="auth-feat-dot"></div><div class="auth-feat-text">Real identity — real conversations</div></div>
+          <div class="auth-feat"><div class="auth-feat-dot"></div><div class="auth-feat-text">Start and reply to discussions under any subject</div></div>
+          <div class="auth-feat"><div class="auth-feat-dot"></div><div class="auth-feat-text">Vote useful to surface the best knowledge</div></div>
+        </div>
+      </div>
+      <div class="auth-panel-right">
+        <div class="auth-form-title">Create your account</div>
+        <div class="auth-form-sub">Already have an account? <a onclick="show('login',null)" style="cursor:pointer">Log in</a></div>
+        <div class="form-group-auth">
+          <label class="form-label-auth">Username</label>
+          <input class="form-input-auth" type="text" placeholder="yourname" readonly>
+          <div class="form-hint">Visible to others — choose something you're comfortable with.</div>
+        </div>
+        <div class="form-group-auth">
+          <label class="form-label-auth">Email address</label>
+          <input class="form-input-auth" type="email" placeholder="you@example.com" readonly>
+        </div>
+        <div class="form-group-auth">
+          <label class="form-label-auth">Password</label>
+          <input class="form-input-auth" type="password" placeholder="Min. 8 characters" readonly>
+        </div>
+        <div class="checkbox-row"><input type="checkbox" checked readonly><span>I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></span></div>
+        <button class="btn-full">Create account →</button>
+        <div class="auth-footer" style="font-size:11px;color:var(--text-4);margin-top:10px">You'll receive a verification email after signup.</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- 08 CREATE DISCUSSION ───────────────────────────────────────────── -->
+<div class="screen" id="s-create">
+<div class="screen-label">08 · Create discussion</div>
+<div class="browser">
+  <div class="browser-bar"><div class="browser-dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="browser-url">cogitons.com/discussions/new</div></div>
+  <div class="page">
+    <nav class="app-nav"><div class="app-nav-logo">Cogitons</div><div class="app-nav-search"><span class="search-icon">⌕</span><input type="text" placeholder="Search…" readonly></div><div class="app-nav-links"><span class="nav-link">Home</span><span class="nav-link active">Subjects</span><div class="nav-avatar">NK</div></div></nav>
+    <div class="form-page">
+      <div style="font-family:var(--font-mono);font-size:10px;color:var(--text-4);margin-bottom:10px;cursor:pointer" onclick="show('subject',null)">← Studying Abroad</div>
+      <div class="form-page-title">Start a discussion</div>
+      <div class="form-page-sub">Share a question, experience, or perspective under a subject.</div>
+      <div class="form-card">
+        <div class="form-group">
+          <label class="form-label">Subject</label>
+          <span class="form-sub-label">The discussion will appear under this subject.</span>
+          <div class="subject-pill">📚 Studying Abroad</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Title <span style="color:var(--red)">*</span></label>
+          <span class="form-sub-label">A clear, specific title helps others find your discussion.</span>
+          <input class="form-input" type="text" value="What documents do I need for a German student visa from Cameroon?" readonly>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Body <span style="color:var(--red)">*</span></label>
+          <span class="form-sub-label">Give context — the more specific you are, the more useful the responses will be.</span>
+          <textarea class="form-textarea" readonly>I've been accepted to a university in Berlin starting this October and I'm now beginning the visa application process. I've heard the German student visa is very document-heavy and some people get rejected for small mistakes.
+
+I want to make sure I don't miss anything. Has anyone done this recently from Cameroon? What was the process like?</textarea>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-secondary" onclick="show('subject',null)">Cancel</button>
+        <button class="btn-primary">Post discussion →</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- 09 PROFILE ─────────────────────────────────────────────────────── -->
+<div class="screen" id="s-profile">
+<div class="screen-label">09 · Profile page</div>
+<div class="browser">
+  <div class="browser-bar"><div class="browser-dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="browser-url">cogitons.com/profile/nadia-k</div></div>
+  <div class="page">
+    <nav class="app-nav"><div class="app-nav-logo">Cogitons</div><div class="app-nav-search"><span class="search-icon">⌕</span><input type="text" placeholder="Search…" readonly></div><div class="app-nav-links"><span class="nav-link">Home</span><span class="nav-link">Subjects</span><div class="nav-avatar">NK</div></div></nav>
+    <div class="profile-hero">
+      <div class="profile-avatar-lg">N</div>
+      <div class="profile-info">
+        <div class="profile-name">Nadia Kamga</div>
+        <div class="profile-handle">@nadia-k · Member since April 2026</div>
+        <div class="profile-bio">Student at Université de Yaoundé I. Passionate about education, tech, and making knowledge more accessible.</div>
+      </div>
+      <div class="profile-stats">
+        <div class="ps-item"><div class="ps-val">7</div><div class="ps-label">discussions</div></div>
+        <div class="ps-item"><div class="ps-val">23</div><div class="ps-label">responses</div></div>
+        <div class="ps-item"><div class="ps-val">84</div><div class="ps-label">useful votes received</div></div>
+      </div>
+      <button class="btn-edit-profile">Edit profile</button>
+    </div>
+    <div class="profile-body">
+      <div>
+        <div class="profile-tab-bar">
+          <div class="ptab on">Discussions</div>
+          <div class="ptab">Responses</div>
+        </div>
+        <div class="disc-card">
+          <div class="dc-top"><div class="dc-avatar av-1">NK</div><span class="dc-name">Nadia K.</span><span style="font-family:var(--font-mono);font-size:10px;color:var(--text-4);margin-left:auto">Studying Abroad · 2h ago</span></div>
+          <div class="dc-title">What documents do I need for a German student visa from Cameroon?</div>
+          <div class="dc-preview">I've been accepted to a university in Berlin and I'm beginning the visa process…</div>
+          <div class="dc-footer"><button class="useful-pill on"><span class="check">✓</span> Useful · 14</button><span class="replies-count">💬 8 responses</span></div>
+        </div>
+        <div class="disc-card">
+          <div class="dc-top"><div class="dc-avatar av-1">NK</div><span class="dc-name">Nadia K.</span><span style="font-family:var(--font-mono);font-size:10px;color:var(--text-4);margin-left:auto">Career Advice · 3d ago</span></div>
+          <div class="dc-title">How do you negotiate your first salary in Cameroon?</div>
+          <div class="dc-preview">Just received my first job offer and unsure how to approach the salary negotiation without seeming ungrateful…</div>
+          <div class="dc-footer"><button class="useful-pill"><span class="check">✓</span> Useful · 6</button><span class="replies-count">💬 4 responses</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="widget">
+          <div class="widget-title">Active in</div>
+          <div class="recent-item"><div class="ri-text" onclick="show('subject',null)">Studying Abroad</div><div class="ri-meta">4 discussions · 12 responses</div></div>
+          <div class="recent-item"><div class="ri-text">Career Advice</div><div class="ri-meta">2 discussions · 7 responses</div></div>
+          <div class="recent-item"><div class="ri-text">Tech & Dev</div><div class="ri-meta">1 discussion · 4 responses</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- 10 ADMIN REPORTS ───────────────────────────────────────────────── -->
+<div class="screen" id="s-admin-reports">
+<div class="screen-label">10 · Admin · Reports</div>
+<div class="browser">
+  <div class="browser-bar"><div class="browser-dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="browser-url">cogitons.com/admin/reports</div></div>
+  <div class="page">
+    <nav class="app-nav"><div class="app-nav-logo">Cogitons</div><div class="app-nav-search"><span class="search-icon">⌕</span><input type="text" placeholder="Search…" readonly></div><div class="app-nav-links"><span class="nav-link">Home</span><span class="nav-link">Subjects</span><div class="nav-avatar" style="background:var(--red)">TX</div></div></nav>
+    <div class="admin-layout">
+      <div class="admin-sidebar">
+        <div class="admin-sidebar-title">Admin</div>
+        <div class="admin-nav-item on"><span class="admin-nav-icon">🚩</span>Reports<span class="admin-badge">4</span></div>
+        <div class="admin-nav-item" onclick="show('admin-subjects',null)"><span class="admin-nav-icon">📚</span>Subjects</div>
+        <div class="admin-nav-item"><span class="admin-nav-icon">👤</span>Users</div>
+      </div>
+      <div class="admin-main">
+        <div class="admin-page-title">Pending Reports</div>
+        <div class="admin-page-sub">4 reports awaiting review · sorted by most recent</div>
+        <div class="report-card urgent">
+          <div class="rc-header"><span class="rc-type-badge badge-resp">Response</span><div class="rc-content-preview">"You're clearly not qualified to give advice here, stop spreading misinformation about the visa process…"</div></div>
+          <div class="rc-meta-row">
+            <div class="rc-meta-item"><div class="rc-meta-label">Reported by</div><div class="rc-meta-val">Amara J.</div></div>
+            <div class="rc-meta-item"><div class="rc-meta-label">Author</div><div class="rc-meta-val">Anonymous99</div></div>
+            <div class="rc-meta-item"><div class="rc-meta-label">When</div><div class="rc-meta-val">30 min ago</div></div>
+            <div class="rc-meta-item"><div class="rc-meta-label">Discussion</div><div class="rc-meta-val" style="color:var(--blue);cursor:pointer">German visa documents</div></div>
+          </div>
+          <div class="rc-reason-box">Reason: "Personal attack — insulting tone, not contributing to the discussion"</div>
+          <div class="rc-actions-row">
+            <button class="action-btn btn-dismiss">Dismiss</button>
+            <button class="action-btn btn-remove">Remove content</button>
+            <button class="action-btn btn-lock">Lock discussion</button>
+            <button class="action-btn btn-suspend">Suspend user</button>
+          </div>
+        </div>
+        <div class="report-card">
+          <div class="rc-header"><span class="rc-type-badge badge-disc">Discussion</span><div class="rc-content-preview">"Buy my IELTS certificate without exam — 100% genuine result guaranteed, WhatsApp me…"</div></div>
+          <div class="rc-meta-row">
+            <div class="rc-meta-item"><div class="rc-meta-label">Reported by</div><div class="rc-meta-val">Daniel M.</div></div>
+            <div class="rc-meta-item"><div class="rc-meta-label">Author</div><div class="rc-meta-val">newuser2026</div></div>
+            <div class="rc-meta-item"><div class="rc-meta-label">When</div><div class="rc-meta-val">2h ago</div></div>
+          </div>
+          <div class="rc-reason-box">Reason: "Spam / scam — advertising fraudulent services"</div>
+          <div class="rc-actions-row">
+            <button class="action-btn btn-dismiss">Dismiss</button>
+            <button class="action-btn btn-remove">Remove content</button>
+            <button class="action-btn btn-suspend">Suspend user</button>
+          </div>
+        </div>
+        <div class="report-card">
+          <div class="rc-header"><span class="rc-type-badge badge-resp">Response</span><div class="rc-content-preview">"I disagree with the above — the requirements changed in 2025 and the blocked account amount is now different…"</div></div>
+          <div class="rc-meta-row">
+            <div class="rc-meta-item"><div class="rc-meta-label">Reported by</div><div class="rc-meta-val">Brigitte F.</div></div>
+            <div class="rc-meta-item"><div class="rc-meta-label">Author</div><div class="rc-meta-val">Daniel M.</div></div>
+            <div class="rc-meta-item"><div class="rc-meta-label">When</div><div class="rc-meta-val">5h ago</div></div>
+          </div>
+          <div class="rc-reason-box">Reason: "Misinformation — providing incorrect information"</div>
+          <div class="rc-actions-row">
+            <button class="action-btn btn-dismiss">Dismiss</button>
+            <button class="action-btn btn-remove">Remove content</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- 11 ADMIN SUBJECTS ──────────────────────────────────────────────── -->
+<div class="screen" id="s-admin-subjects">
+<div class="screen-label">11 · Admin · Subjects</div>
+<div class="browser">
+  <div class="browser-bar"><div class="browser-dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="browser-url">cogitons.com/admin/subjects</div></div>
+  <div class="page">
+    <nav class="app-nav"><div class="app-nav-logo">Cogitons</div><div class="app-nav-search"><span class="search-icon">⌕</span><input type="text" placeholder="Search…" readonly></div><div class="app-nav-links"><span class="nav-link">Home</span><span class="nav-link">Subjects</span><div class="nav-avatar" style="background:var(--red)">TX</div></div></nav>
+    <div class="admin-layout">
+      <div class="admin-sidebar">
+        <div class="admin-sidebar-title">Admin</div>
+        <div class="admin-nav-item" onclick="show('admin-reports',null)"><span class="admin-nav-icon">🚩</span>Reports<span class="admin-badge">4</span></div>
+        <div class="admin-nav-item on"><span class="admin-nav-icon">📚</span>Subjects</div>
+        <div class="admin-nav-item"><span class="admin-nav-icon">👤</span>Users</div>
+      </div>
+      <div class="admin-main">
+        <div class="admin-page-title">Subject Management</div>
+        <div class="admin-page-sub">12 active subjects · 0 archived</div>
+        <button class="btn-create-subject">+ Create new subject</button>
+        <div class="admin-subject-card">
+          <div class="status-dot status-active"></div>
+          <div class="asc-info"><div class="asc-title">Studying Abroad</div><div class="asc-slug">/subjects/studying-abroad</div></div>
+          <div class="asc-count">42 discussions</div>
+          <div class="asc-actions"><button class="asc-btn">Edit</button><button class="asc-btn">Archive</button></div>
+        </div>
+        <div class="admin-subject-card">
+          <div class="status-dot status-active"></div>
+          <div class="asc-info"><div class="asc-title">Entrepreneurship in Cameroon</div><div class="asc-slug">/subjects/entrepreneurship-cameroon</div></div>
+          <div class="asc-count">37 discussions</div>
+          <div class="asc-actions"><button class="asc-btn">Edit</button><button class="asc-btn">Archive</button></div>
+        </div>
+        <div class="admin-subject-card">
+          <div class="status-dot status-active"></div>
+          <div class="asc-info"><div class="asc-title">Career Advice</div><div class="asc-slug">/subjects/career-advice</div></div>
+          <div class="asc-count">29 discussions</div>
+          <div class="asc-actions"><button class="asc-btn">Edit</button><button class="asc-btn">Archive</button></div>
+        </div>
+        <div class="admin-subject-card">
+          <div class="status-dot status-active"></div>
+          <div class="asc-info"><div class="asc-title">Tech & Software Development</div><div class="asc-slug">/subjects/tech-software-development</div></div>
+          <div class="asc-count">24 discussions</div>
+          <div class="asc-actions"><button class="asc-btn">Edit</button><button class="asc-btn">Archive</button></div>
+        </div>
+        <div class="admin-subject-card" style="opacity:.6">
+          <div class="status-dot status-archived"></div>
+          <div class="asc-info"><div class="asc-title">General Discussion</div><div class="asc-slug">/subjects/general-discussion</div></div>
+          <div class="asc-count" style="color:var(--text-4)">8 discussions · archived</div>
+          <div class="asc-actions"><button class="asc-btn">Restore</button><button class="asc-btn" style="color:var(--red)">Remove</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+</div><!-- end canvas -->
+
+<script>
+function show(id, btn) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('s-'+id).classList.add('active');
+  if (btn) {
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  // Update active nav btn when navigating via in-screen links
+  const map = {
+    home:0, subjects:1, subject:2, thread:3, search:4,
+    login:5, signup:6, create:7, profile:8,
+    'admin-reports':9, 'admin-subjects':10
+  };
+  if (!btn && map[id] !== undefined) {
+    document.querySelectorAll('.nav-btn').forEach((b,i) => b.classList.toggle('active', i===map[id]));
+  }
+}
+// Sort button toggle
+document.querySelectorAll('.sort-btn').forEach(b => {
+  b.addEventListener('click', function() {
+    this.closest('.sort-group').querySelectorAll('.sort-btn').forEach(x => x.classList.remove('on'));
+    this.classList.add('on');
+  });
+});
+// Useful pill toggle
+document.querySelectorAll('.useful-pill').forEach(b => {
+  b.addEventListener('click', function(e) {
+    e.stopPropagation();
+    const isOn = this.classList.toggle('on');
+    const txt = this.textContent;
+    const match = txt.match(/(\d+)/);
+    if (match) {
+      const n = parseInt(match[1]) + (isOn ? 1 : -1);
+      this.innerHTML = `<span class="check">✓</span> Useful · ${n}`;
+    }
+  });
+});
+// Action buttons in admin
+document.querySelectorAll('.action-btn').forEach(b => {
+  b.addEventListener('click', function() {
+    this.textContent = '✓ Done';
+    this.style.opacity = '.5';
+    this.disabled = true;
+  });
+});
+</script>
+</body>
+</html>
