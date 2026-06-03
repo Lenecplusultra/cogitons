@@ -11,10 +11,10 @@ from app.core.database import Base
 ReportReasonEnum = Enum(
     "spam", "harassment", "hate_speech", "dangerous_content",
     "misinformation", "privacy_violation", "off_topic", "other",
-    name="report_reason", create_type=True,
+    name="report_reason", create_type=False,
 )
-ReportTargetTypeEnum = Enum("discussion", "response", name="report_target_type", create_type=True)
-ReportStatusEnum = Enum("pending", "dismissed", "actioned", name="report_status", create_type=True)
+ReportTargetTypeEnum = Enum("discussion", "response", name="report_target_type", create_type=False)
+ReportStatusEnum = Enum("pending", "dismissed", "actioned", name="report_status", create_type=False)
 
 
 class Report(Base):

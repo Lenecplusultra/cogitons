@@ -8,7 +8,7 @@ from sqlalchemy.types import DateTime
 
 from app.core.database import Base
 
-DiscussionStatusEnum = Enum("published", "locked", "removed", name="discussion_status", create_type=True)
+DiscussionStatusEnum = Enum("published", "locked", "removed", name="discussion_status", create_type=False)
 
 
 class Discussion(Base):

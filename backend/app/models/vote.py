@@ -8,7 +8,7 @@ from sqlalchemy.types import DateTime
 
 from app.core.database import Base
 
-VoteTargetTypeEnum = Enum("discussion", "response", name="vote_target_type", create_type=True)
+VoteTargetTypeEnum = Enum("discussion", "response", name="vote_target_type", create_type=False)
 
 
 class Vote(Base):

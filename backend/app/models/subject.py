@@ -8,7 +8,7 @@ from sqlalchemy.types import DateTime
 
 from app.core.database import Base
 
-SubjectStatusEnum = Enum("active", "archived", "removed", name="subject_status", create_type=True)
+SubjectStatusEnum = Enum("active", "archived", "removed", name="subject_status", create_type=False)
 
 
 class Subject(Base):

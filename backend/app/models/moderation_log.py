@@ -15,10 +15,10 @@ from app.core.database import Base
 ModerationActionEnum = Enum(
     "dismiss_report", "remove_content", "lock_discussion",
     "unlock_discussion", "suspend_user", "restore_user",
-    name="moderation_action", create_type=True,
+    name="moderation_action", create_type=False,
 )
 ModerationTargetTypeEnum = Enum(
-    "discussion", "response", "user", name="moderation_target_type", create_type=True
+    "discussion", "response", "user", name="moderation_target_type", create_type=False
 )
 
 

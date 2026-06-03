@@ -11,7 +11,7 @@ from sqlalchemy.types import DateTime
 
 from app.core.database import Base
 
-ResponseStatusEnum = Enum("published", "removed", name="response_status", create_type=True)
+ResponseStatusEnum = Enum("published", "removed", name="response_status", create_type=False)
 
 
 class Response(Base):

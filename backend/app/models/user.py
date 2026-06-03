@@ -8,8 +8,8 @@ from sqlalchemy.types import DateTime
 
 from app.core.database import Base
 
-UserRoleEnum = Enum("user", "admin", name="user_role", create_type=True)
-UserStatusEnum = Enum("active", "suspended", "removed", name="user_status", create_type=True)
+UserRoleEnum = Enum("user", "admin", name="user_role", create_type=False)
+UserStatusEnum = Enum("active", "suspended", "removed", name="user_status", create_type=False)
 
 
 class User(Base):
