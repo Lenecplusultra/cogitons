@@ -1,17 +1,30 @@
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+
+    # Database
     DATABASE_URL: str
+
+    # JWT
     SECRET_KEY: str
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+
+    # Email (Resend)
     RESEND_API_KEY: str
     EMAIL_FROM: str = "noreply@cogitons.com"
-    FRONTEND_URL: str = "http://localhost:3000"
-    ENVIRONMENT: str = "development"
+    EMAIL_FROM_NAME: str = "Cogitons"
 
-    class Config:
-        env_file = ".env"
+    # App
+    APP_ENV: str = "development"
+    FRONTEND_URL: str = "http://localhost:3000"
+    ALLOWED_ORIGINS: list[str] = ["http://localhost:3000"]
+
+    # Rate limiting (max resend-verification requests per hour per email)
+    RESEND_VERIFICATION_RATE_LIMIT: int = 3
+
 
 settings = Settings()
