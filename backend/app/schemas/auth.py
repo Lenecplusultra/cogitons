@@ -3,8 +3,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
-
 # ── Request schemas (what the client sends) ──────────────────────────────────
+
 
 class SignupRequest(BaseModel):
     username: str = Field(min_length=3, max_length=40)
@@ -42,6 +42,7 @@ class PasswordResetConfirmSchema(BaseModel):
 
 
 # ── Response schemas (what the server returns) ────────────────────────────────
+
 
 class UserPublicSchema(BaseModel):
     id: uuid.UUID

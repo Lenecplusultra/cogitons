@@ -14,12 +14,14 @@ resend.api_key = settings.RESEND_API_KEY
 
 def _send(to: str, subject: str, html: str) -> None:
     """Base send function. All emails go through here."""
-    resend.Emails.send({
-        "from": f"{settings.EMAIL_FROM_NAME} <{settings.EMAIL_FROM}>",
-        "to": [to],
-        "subject": subject,
-        "html": html,
-    })
+    resend.Emails.send(
+        {
+            "from": f"{settings.EMAIL_FROM_NAME} <{settings.EMAIL_FROM}>",
+            "to": [to],
+            "subject": subject,
+            "html": html,
+        }
+    )
 
 
 def send_verification_email(to: str, username: str, raw_token: str) -> None:

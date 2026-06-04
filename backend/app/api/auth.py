@@ -4,12 +4,12 @@ Validates input, calls AuthService, sets/clears cookies.
 No business logic here.
 """
 
-from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.database import get_db
-from app.core.dependencies import get_current_verified_user, get_refresh_token_from_cookie
+from app.core.dependencies import get_refresh_token_from_cookie
 from app.schemas.auth import (
     AuthResponse,
     LoginRequest,
@@ -32,11 +32,11 @@ def _set_refresh_cookie(response: Response, raw_token: str) -> None:
     response.set_cookie(
         key=COOKIE_NAME,
         value=raw_token,
-        httponly=True,           # Not accessible via JavaScript
+        httponly=True,  # Not accessible via JavaScript
         secure=settings.APP_ENV == "production",  # HTTPS only in production
         samesite="lax",
         max_age=COOKIE_MAX_AGE,
-        path="/api/v1/auth",     # Cookie only sent to auth endpoints
+        path="/api/v1/auth",  # Cookie only sent to auth endpoints
     )
 
 
@@ -47,7 +47,16 @@ def _clear_refresh_cookie(response: Response) -> None:
 def _handle_auth_error(e: AuthError) -> None:
     raise HTTPException(
         status_code=e.status_code,
-        detail={"code": "UNAUTHORIZED" if e.status_code == 401 else "FORBIDDEN" if e.status_code == 403 else "CONFLICT" if e.status_code == 409 else "VALIDATION_ERROR", "message": e.message},
+        detail={
+            "code": "UNAUTHORIZED"
+            if e.status_code == 401
+            else "FORBIDDEN"
+            if e.status_code == 403
+            else "CONFLICT"
+            if e.status_code == 409
+            else "VALIDATION_ERROR",
+            "message": e.message,
+        },
     )
 
 

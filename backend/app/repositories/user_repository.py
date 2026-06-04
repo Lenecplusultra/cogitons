@@ -121,7 +121,6 @@ class UserRepository:
         from sqlalchemy import delete
 
         stmt = delete(RefreshToken).where(
-            (RefreshToken.expires_at < datetime.now(UTC))
-            | (RefreshToken.revoked_at.is_not(None))
+            (RefreshToken.expires_at < datetime.now(UTC)) | (RefreshToken.revoked_at.is_not(None))
         )
         self.db.execute(stmt)

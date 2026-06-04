@@ -10,15 +10,13 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.security import (
+    _hash_token,
     create_access_token,
     create_refresh_token,
     create_verification_token,
-    decode_access_token,
     hash_password,
     verify_password,
-    _hash_token,
 )
-from app.models.user import User
 from app.repositories.user_repository import UserRepository
 from app.schemas.auth import (
     AuthResponse,
@@ -31,11 +29,12 @@ from app.schemas.auth import (
     UserPublicSchema,
     VerifyEmailRequest,
 )
-from app.utils.email import send_verification_email, send_password_reset_email
+from app.utils.email import send_password_reset_email, send_verification_email
 
 
 class AuthError(Exception):
     """Raised when an auth operation fails. Carries an HTTP status code."""
+
     def __init__(self, message: str, status_code: int = 400):
         self.message = message
         self.status_code = status_code
