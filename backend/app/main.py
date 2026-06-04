@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.health import router as health_router
+from app.api.auth import router as auth_router
 from app.core.config import settings
 
 app = FastAPI(
@@ -27,6 +28,8 @@ API_PREFIX = "/api/v1"
 
 app.include_router(health_router, prefix=API_PREFIX, tags=["health"])
 
+app.include_router(auth_router, prefix=API_PREFIX, tags=["auth"])
+
 # Phase 1+ routers will be added here as they are built:
 # from app.api.auth import router as auth_router
 # app.include_router(auth_router, prefix=API_PREFIX, tags=["auth"])
@@ -36,3 +39,6 @@ app.include_router(health_router, prefix=API_PREFIX, tags=["health"])
 @app.get("/", include_in_schema=False)
 def root() -> dict:
     return {"message": "Cogitons API is running. See /api/docs for documentation."}
+
+
+
