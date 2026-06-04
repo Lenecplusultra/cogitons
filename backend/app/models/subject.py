@@ -18,9 +18,15 @@ class Subject(Base):
     title: Mapped[str] = mapped_column(String(150), unique=True, nullable=False)
     slug: Mapped[str] = mapped_column(String(170), unique=True, nullable=False, index=True)
     description: Mapped[str] = mapped_column(Text, nullable=False)
-    status: Mapped[str] = mapped_column(SubjectStatusEnum, nullable=False, default="active", index=True)
-    created_by: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    status: Mapped[str] = mapped_column(
+        SubjectStatusEnum, nullable=False, default="active", index=True
+    )
+    created_by: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id"), nullable=False
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
     )
@@ -34,12 +40,18 @@ class Subject(Base):
 
 class SubjectSlugHistory(Base):
     """Addition 4: slug changes must be a single transaction at the service layer."""
+
     __tablename__ = "subject_slug_history"
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     subject_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("subjects.id", ondelete="CASCADE"), nullable=False, index=True
+        UUID(as_uuid=True),
+        ForeignKey("subjects.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     old_slug: Mapped[str] = mapped_column(String(170), nullable=False, index=True)
-    changed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    changed_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
     subject: Mapped["Subject"] = relationship(back_populates="slug_history")

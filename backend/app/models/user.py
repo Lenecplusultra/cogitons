@@ -21,7 +21,9 @@ class User(Base):
     password_hash: Mapped[str] = mapped_column(Text, nullable=False)
     bio: Mapped[str | None] = mapped_column(String(300), nullable=True)
     role: Mapped[str] = mapped_column(UserRoleEnum, nullable=False, default="user", index=True)
-    status: Mapped[str] = mapped_column(UserStatusEnum, nullable=False, default="active", index=True)
+    status: Mapped[str] = mapped_column(
+        UserStatusEnum, nullable=False, default="active", index=True
+    )
     email_verified: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
