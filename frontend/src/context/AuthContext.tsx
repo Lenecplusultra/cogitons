@@ -7,7 +7,7 @@ import {
   useState,
   useCallback,
 } from "react";
-import { api, UserMe } from "@/lib/api";
+import { api, UserMe, tokenStore } from "@/lib/api";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -57,6 +57,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = useCallback(async () => {
     try {
       await api.auth.logout();
+    tokenStore.set(null);
     } finally {
       setUser(null);
     }
