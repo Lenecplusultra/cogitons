@@ -38,7 +38,9 @@ class User(Base):
     discussions: Mapped[list["Discussion"]] = relationship(back_populates="author")  # noqa: F821
     responses: Mapped[list["Response"]] = relationship(back_populates="author")  # noqa: F821
     votes: Mapped[list["Vote"]] = relationship(back_populates="user")  # noqa: F821
-    reports: Mapped[list["Report"]] = relationship(back_populates="reporter", foreign_keys="Report.reporter_id")  # noqa: F821
+    reports: Mapped[list["Report"]] = relationship(
+        back_populates="reporter", foreign_keys="Report.reporter_id"
+    )  # noqa: F821
     moderation_logs: Mapped[list["ModerationLog"]] = relationship(back_populates="admin")  # noqa: F821
 
     def __repr__(self) -> str:
