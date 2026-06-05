@@ -4,10 +4,12 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { api } from "@/lib/api";
+import { api, tokenStore } from "@/lib/api";
+import { useAuth } from "@/context/AuthContext";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login } = useAuth();
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -26,10 +28,10 @@ export default function LoginPage() {
         setError(res.error.message);
         return;
       }
-      // JWT + refresh token set as HTTP-only cookies by the backend.
-      // Redirect to home — auth state picks up on next render.
-      router.push("/");
-      router.refresh();
+      const { access_token, user } = res.data as { access_token: string; user: import("@/lib/api").UserMe };
+      tokenStore.set(access_token);
+      login(user);
+      router.push(`/profile/${user.username}`);
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
@@ -41,10 +43,7 @@ export default function LoginPage() {
     <main className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <span
-            className="text-3xl font-bold tracking-tight"
-            style={{ color: "var(--brand-navy)" }}
-          >
+          <span className="text-3xl font-bold tracking-tight" style={{ color: "var(--brand-navy)" }}>
             Cogitons
           </span>
           <p className="mt-2 text-sm text-muted-foreground">
@@ -53,15 +52,11 @@ export default function LoginPage() {
         </div>
 
         <div className="rounded-2xl border border-border bg-card p-8 shadow-sm">
-          <h1 className="mb-6 text-xl font-semibold text-foreground">
-            Log in
-          </h1>
+          <h1 className="mb-6 text-xl font-semibold text-foreground">Log in</h1>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-foreground">
-                Email
-              </label>
+              <label className="text-sm font-medium text-foreground">Email</label>
               <input
                 name="email"
                 type="email"
@@ -78,14 +73,8 @@ export default function LoginPage() {
 
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-foreground">
-                  Password
-                </label>
-                <Link
-                  href="/forgot-password"
-                  className="text-xs hover:underline"
-                  style={{ color: "var(--brand-blue)" }}
-                >
+                <label className="text-sm font-medium text-foreground">Password</label>
+                <Link href="/forgot-password" className="text-xs hover:underline" style={{ color: "var(--brand-blue)" }}>
                   Forgot password?
                 </Link>
               </div>
@@ -104,9 +93,7 @@ export default function LoginPage() {
             </div>
 
             {error && (
-              <p className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                {error}
-              </p>
+              <p className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p>
             )}
 
             <Button
@@ -121,11 +108,7 @@ export default function LoginPage() {
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
             Don&apos;t have an account?{" "}
-            <Link
-              href="/signup"
-              className="font-medium hover:underline"
-              style={{ color: "var(--brand-blue)" }}
-            >
+            <Link href="/signup" className="font-medium hover:underline" style={{ color: "var(--brand-blue)" }}>
               Sign up
             </Link>
           </p>

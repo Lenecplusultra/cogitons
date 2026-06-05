@@ -3,6 +3,7 @@ import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import { AuthProvider } from "@/context/AuthContext";
 
 export const metadata: Metadata = {
   title: "Cogitons",
@@ -16,7 +17,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={cn(GeistSans.variable, GeistMono.variable)}>
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   );
 }
