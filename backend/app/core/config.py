@@ -15,7 +15,7 @@ class Settings(BaseSettings):
 
     # Email (Resend)
     RESEND_API_KEY: str
-    EMAIL_FROM: str = "noreply@cogitons.com"
+    EMAIL_FROM: str = "onboarding@resend.dev"
     EMAIL_FROM_NAME: str = "Cogitons"
 
     # App
