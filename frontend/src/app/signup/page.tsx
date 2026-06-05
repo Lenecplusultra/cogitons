@@ -23,7 +23,7 @@ export default function SignupPage() {
     try {
       const res = await api.auth.signup(form);
       if (!res.success) {
-        setError(res.error.message);
+        setError(typeof res.error === "object" ? res.error.message : String(res.error));
         return;
       }
       // Redirect to a confirmation screen — user must verify email before login

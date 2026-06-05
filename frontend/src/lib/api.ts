@@ -1,10 +1,11 @@
-/**
- * frontend/src/lib/api.ts
- * Thin fetch wrapper — all API calls go through here.
- * Base URL comes from NEXT_PUBLIC_API_URL env var.
- */
-
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+
+// In-memory token store — not localStorage (XSS safe)
+let _accessToken: string | null = null;
+export const tokenStore = {
+  get: () => _accessToken,
+  set: (t: string | null) => { _accessToken = t; },
+};
 
 type ApiResponse<T = unknown> =
   | { success: true; data: T; message?: string }
@@ -14,17 +15,42 @@ async function request<T>(
   path: string,
   options: RequestInit = {}
 ): Promise<ApiResponse<T>> {
-  const res = await fetch(`${BASE}/api/v1${path}`, {
-    headers: { "Content-Type": "application/json", ...options.headers },
-    credentials: "include", // send/receive HTTP-only cookies
-    ...options,
-  });
+  try {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...(options.headers as Record<string, string>),
+    };
+    if (_accessToken) {
+      headers["Authorization"] = `Bearer ${_accessToken}`;
+    }
 
-  const json = await res.json();
-  return json as ApiResponse<T>;
+    const res = await fetch(`${BASE}/api/v1${path}`, {
+      ...options,
+      headers,
+      credentials: "include",
+    });
+
+    const json = await res.json();
+
+    if (!res.ok) {
+      const message =
+        json?.detail?.[0]?.msg ??
+        json?.detail?.message ??
+        json?.detail ??
+        json?.error?.message ??
+        "Something went wrong.";
+      return { success: false, error: { code: String(res.status), message } };
+    }
+
+    if ("success" in json) return json as ApiResponse<T>;
+    return { success: true, data: json as T };
+  } catch {
+    return {
+      success: false,
+      error: { code: "NETWORK_ERROR", message: "Could not reach the server." },
+    };
+  }
 }
-
-// ── Auth ────────────────────────────────────────────────────────────────────
 
 export const api = {
   auth: {
@@ -69,8 +95,6 @@ export const api = {
       request(`/users/${username}`),
   },
 };
-
-// ── Types ───────────────────────────────────────────────────────────────────
 
 export interface UserMe {
   id: string;
