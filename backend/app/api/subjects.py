@@ -1,7 +1,6 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query
-from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -12,7 +11,7 @@ from app.schemas.subject import (
     UpdateSubjectRequest,
     UpdateSubjectStatusRequest,
 )
-from app.services.subject_service import _OldSlugFound, subject_service
+from app.services.subject_service import _OldSlugFoundError, subject_service
 
 router = APIRouter(prefix="/subjects", tags=["subjects"])
 
@@ -34,7 +33,7 @@ def get_subject(slug: str, db: Session = Depends(get_db)):
     try:
         result = subject_service.get_subject(db, slug)
         return {"success": True, "data": result.model_dump()}
-    except _OldSlugFound as e:
+    except _OldSlugFoundError as e:
         # Return the subject at its current slug directly — browser clients
         # can't reliably follow cross-origin redirects with fetch()
         result = subject_service.get_subject(db, e.current_slug)

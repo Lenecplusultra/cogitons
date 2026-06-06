@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 
 # ── Response schemas ───────────────────────────────────────────────────────────
 
+
 class SubjectResponse(BaseModel):
     id: UUID
     title: str
@@ -42,6 +43,7 @@ class SubjectListResponse(BaseModel):
 
 
 # ── Request schemas ────────────────────────────────────────────────────────────
+
 
 class CreateSubjectRequest(BaseModel):
     title: str = Field(..., min_length=3, max_length=150)

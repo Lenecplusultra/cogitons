@@ -21,6 +21,7 @@ from app.schemas.subject import (
 
 # ── Slug utility ───────────────────────────────────────────────────────────────
 
+
 def _generate_slug(title: str) -> str:
     """
     Convert a title to a URL-safe slug.
@@ -35,18 +36,17 @@ def _generate_slug(title: str) -> str:
 
 # ── Internal signal for old-slug redirects ────────────────────────────────────
 
-class _OldSlugFound(Exception):
+
+class _OldSlugFoundError(Exception):
     def __init__(self, current_slug: str):
         self.current_slug = current_slug
 
 
 # ── Service ───────────────────────────────────────────────────────────────────
 
-class SubjectService:
 
-    def list_subjects(
-        self, db: Session, page: int, page_size: int
-    ) -> SubjectListResponse:
+class SubjectService:
+    def list_subjects(self, db: Session, page: int, page_size: int) -> SubjectListResponse:
         subjects, total = subject_repository.get_all_active(db, page, page_size)
         total_pages = math.ceil(total / page_size) if page_size > 0 else 0
 
@@ -79,7 +79,7 @@ class SubjectService:
             # Check slug history — raise internal signal so router can 302
             history = subject_repository.get_slug_history(db, slug)
             if history:
-                raise _OldSlugFound(history.subject.slug)
+                raise _OldSlugFoundError(history.subject.slug)
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail={

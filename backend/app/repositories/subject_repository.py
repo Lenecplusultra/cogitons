@@ -7,7 +7,6 @@ from app.models.subject import Subject, SubjectSlugHistory
 
 
 class SubjectRepository:
-
     def get_all_active(
         self, db: Session, page: int = 1, page_size: int = 20
     ) -> tuple[list[Subject], int]:
@@ -33,21 +32,15 @@ class SubjectRepository:
 
     def get_slug_history(self, db: Session, slug: str) -> SubjectSlugHistory | None:
         """Return history entry if this is an old slug."""
-        return db.scalar(
-            select(SubjectSlugHistory).where(SubjectSlugHistory.old_slug == slug)
-        )
+        return db.scalar(select(SubjectSlugHistory).where(SubjectSlugHistory.old_slug == slug))
 
-    def title_exists(
-        self, db: Session, title: str, exclude_id: UUID | None = None
-    ) -> bool:
+    def title_exists(self, db: Session, title: str, exclude_id: UUID | None = None) -> bool:
         q = select(Subject).where(Subject.title == title)
         if exclude_id:
             q = q.where(Subject.id != exclude_id)
         return db.scalar(q) is not None
 
-    def slug_exists(
-        self, db: Session, slug: str, exclude_id: UUID | None = None
-    ) -> bool:
+    def slug_exists(self, db: Session, slug: str, exclude_id: UUID | None = None) -> bool:
         q = select(Subject).where(Subject.slug == slug)
         if exclude_id:
             q = q.where(Subject.id != exclude_id)
@@ -55,12 +48,16 @@ class SubjectRepository:
 
     def get_discussion_count(self, db: Session, subject_id: UUID) -> int:
         from app.models.discussion import Discussion  # avoid circular import
-        return db.scalar(
-            select(func.count(Discussion.id)).where(
-                Discussion.subject_id == subject_id,
-                Discussion.status == "published",
+
+        return (
+            db.scalar(
+                select(func.count(Discussion.id)).where(
+                    Discussion.subject_id == subject_id,
+                    Discussion.status == "published",
+                )
             )
-        ) or 0
+            or 0
+        )
 
 
 subject_repository = SubjectRepository()
