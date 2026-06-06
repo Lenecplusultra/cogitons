@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.auth import router as auth_router
 from app.api.discussions import router as discussions_router
 from app.api.health import router as health_router
+from app.api.responses import router as responses_router
 from app.api.subjects import router as subjects_router
 from app.api.users import router as users_router
 from app.core.config import settings
@@ -38,6 +39,8 @@ app.include_router(users_router, prefix=API_PREFIX, tags=["users"])
 app.include_router(subjects_router, prefix=API_PREFIX, tags=["subjects"])
 
 app.include_router(discussions_router, prefix=API_PREFIX, tags=["discussions"])
+
+app.include_router(responses_router, prefix=API_PREFIX, tags=["responses"])
 
 # Phase 1+ routers will be added here as they are built:
 # from app.api.auth import router as auth_router
