@@ -103,9 +103,8 @@ def refresh(
             detail={"code": "UNAUTHORIZED", "message": "No session found. Please log in."},
         )
     try:
-        auth_response = AuthService(db).refresh(raw_refresh_token)
-        # Issue a new cookie with the same token (sliding expiry not implemented in V1)
-        _set_refresh_cookie(response, raw_refresh_token)
+        auth_response, new_raw_refresh = AuthService(db).refresh(raw_refresh_token)
+        _set_refresh_cookie(response, new_raw_refresh)  # set the NEW token, not the old one
         return auth_response
     except AuthError as e:
         _handle_auth_error(e)

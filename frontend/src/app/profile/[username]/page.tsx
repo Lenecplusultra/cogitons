@@ -15,7 +15,7 @@ interface PublicProfile {
 
 export default function ProfilePage() {
   const { username } = useParams<{ username: string }>();
-  const { user: currentUser, refresh } = useAuth();
+  const { user: currentUser, loading: authLoading, refresh } = useAuth();
   const router = useRouter();
 
   const [profile, setProfile] = useState<PublicProfile | null>(null);
@@ -42,7 +42,6 @@ export default function ProfilePage() {
     })();
   }, [username]);
 
-  // Pre-fill edit form with current values
   function startEditing() {
     if (!profile) return;
     setEditUsername(profile.username);
@@ -64,13 +63,11 @@ export default function ProfilePage() {
         setEditError(res.error.message);
         return;
       }
-      // If username changed, navigate to new profile URL
       if (editUsername !== profile?.username) {
-        await refresh(); // update auth context
+        await refresh();
         router.replace(`/profile/${editUsername}`);
         return;
       }
-      // Otherwise update local state and exit edit mode
       setProfile((p) => p ? { ...p, username: editUsername, bio: editBio || null } : p);
       await refresh();
       setEditing(false);
@@ -79,6 +76,16 @@ export default function ProfilePage() {
     } finally {
       setEditLoading(false);
     }
+  }
+
+  // ── Loading — wait for both auth and profile ───────────────────────────────
+
+  if (authLoading || !profile) {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-background">
+        <p className="text-sm text-muted-foreground">Loading…</p>
+      </main>
+    );
   }
 
   // ── Not found ──────────────────────────────────────────────────────────────
@@ -104,22 +111,11 @@ export default function ProfilePage() {
     );
   }
 
-  // ── Loading ────────────────────────────────────────────────────────────────
-
-  if (!profile) {
-    return (
-      <main className="min-h-screen flex items-center justify-center bg-background">
-        <p className="text-sm text-muted-foreground">Loading…</p>
-      </main>
-    );
-  }
-
   // ── Profile view ───────────────────────────────────────────────────────────
 
   return (
     <main className="min-h-screen bg-background px-4 py-12">
       <div className="mx-auto max-w-lg">
-        {/* Header */}
         <div className="mb-2 flex items-center justify-between">
           <button
             onClick={() => router.push("/")}
@@ -133,7 +129,6 @@ export default function ProfilePage() {
         <div className="rounded-2xl border border-border bg-card p-8 shadow-sm">
           {!editing ? (
             <>
-              {/* Avatar placeholder */}
               <div
                 className="mb-4 flex h-16 w-16 items-center justify-center rounded-full text-2xl font-bold text-white"
                 style={{ backgroundColor: "var(--brand-blue)" }}

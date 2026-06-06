@@ -36,7 +36,8 @@ async function request<T>(
       const message =
         json?.detail?.[0]?.msg ??
         json?.detail?.message ??
-        json?.detail ??
+        json?.detail?.error?.message ??
+        (typeof json?.detail === "string" ? json.detail : null) ??
         json?.error?.message ??
         "Something went wrong.";
       return { success: false, error: { code: String(res.status), message } };
@@ -85,6 +86,8 @@ export const api = {
         method: "POST",
         body: JSON.stringify(body),
       }),
+    
+    refresh: () => request<{ access_token: string }>("/auth/refresh", { method: "POST" }),
   },
 
   users: {
@@ -93,6 +96,19 @@ export const api = {
       request("/users/me", { method: "PATCH", body: JSON.stringify(body) }),
     getByUsername: (username: string) =>
       request(`/users/${username}`),
+  },
+
+  subjects: {
+    list: (page = 1, pageSize = 20) =>
+      request<SubjectListData>(`/subjects?page=${page}&page_size=${pageSize}`),
+    get: (slug: string) =>
+      request<SubjectDetail>(`/subjects/${slug}`),
+    create: (body: { title: string; description: string }) =>
+      request<SubjectDetail>("/subjects", { method: "POST", body: JSON.stringify(body) }),
+    update: (id: string, body: { title?: string; description?: string }) =>
+      request<SubjectDetail>(`/subjects/${id}`, { method: "PATCH", body: JSON.stringify(body) }),
+    updateStatus: (id: string, body: { status: "active" | "archived" | "removed" }) =>
+      request<SubjectDetail>(`/subjects/${id}/status`, { method: "PATCH", body: JSON.stringify(body) }),
   },
 };
 
@@ -105,4 +121,33 @@ export interface UserMe {
   status: "active" | "suspended" | "removed";
   email_verified: boolean;
   created_at: string;
+}
+
+export interface SubjectListItem {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  discussion_count: number;
+  created_at: string;
+}
+ 
+export interface SubjectDetail {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  status: "active" | "archived" | "removed";
+  discussion_count: number;
+  created_at: string;
+}
+ 
+export interface SubjectListData {
+  items: SubjectListItem[];
+  pagination: {
+    page: number;
+    page_size: number;
+    total: number;
+    total_pages: number;
+  };
 }
