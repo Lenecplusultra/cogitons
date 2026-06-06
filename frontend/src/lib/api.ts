@@ -110,6 +110,27 @@ export const api = {
     updateStatus: (id: string, body: { status: "active" | "archived" | "removed" }) =>
       request<SubjectDetail>(`/subjects/${id}/status`, { method: "PATCH", body: JSON.stringify(body) }),
   },
+
+  discussions: {
+    list: (slug: string, sort: "recent" | "most_useful" = "recent", page = 1, pageSize = 20) =>
+      request<DiscussionListData>(
+        `/subjects/${slug}/discussions?sort=${sort}&page=${page}&page_size=${pageSize}`
+      ),
+    get: (id: string) =>
+      request<DiscussionDetail>(`/discussions/${id}`),
+    create: (body: { subject_id: string; title: string; body: string }) =>
+      request<{ id: string; title: string; status: string }>(
+        "/discussions",
+        { method: "POST", body: JSON.stringify(body) }
+      ),
+    update: (id: string, body: { title?: string; body?: string }) =>
+      request<{ id: string; title: string; body: string; edited: boolean }>(
+        `/discussions/${id}`,
+        { method: "PATCH", body: JSON.stringify(body) }
+      ),
+    delete: (id: string) =>
+      request(`/discussions/${id}`, { method: "DELETE" }),
+  },
 };
 
 export interface UserMe {
@@ -144,6 +165,47 @@ export interface SubjectDetail {
  
 export interface SubjectListData {
   items: SubjectListItem[];
+  pagination: {
+    page: number;
+    page_size: number;
+    total: number;
+    total_pages: number;
+  };
+}
+
+export interface DiscussionAuthor {
+  id: string;
+  username: string;
+}
+
+export interface DiscussionCard {
+  id: string;
+  author: DiscussionAuthor;
+  title: string;
+  useful_count: number;
+  response_count: number;
+  edited: boolean;
+  status: string;
+  created_at: string;
+}
+
+export interface DiscussionDetail {
+  id: string;
+  subject: { id: string; title: string; slug: string };
+  author: DiscussionAuthor;
+  title: string;
+  body: string;
+  useful_count: number;
+  current_user_voted: boolean;
+  response_count: number;
+  edited: boolean;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DiscussionListData {
+  items: DiscussionCard[];
   pagination: {
     page: number;
     page_size: number;
