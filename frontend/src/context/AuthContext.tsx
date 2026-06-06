@@ -30,11 +30,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   // Rehydrate session on mount — reads the HTTP-only cookie via GET /users/me
-  const refresh = useCallback(async () => {
-    try {
-      const res = await api.users.me();
-      if (res.success) {
-        setUser(res.data);
+const refresh = useCallback(async () => {
+  try {
+    // Exchange the HTTP-only refresh token cookie for a new access token
+      const tokenRes = await api.auth.refresh();
+      if (tokenRes.success) {
+        tokenStore.set(tokenRes.data.access_token);
+      } else {
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+
+      // Now fetch the user with the fresh access token
+      const userRes = await api.users.me();
+      if (userRes.success) {
+        setUser(userRes.data);
       } else {
         setUser(null);
       }

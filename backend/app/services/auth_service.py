@@ -141,7 +141,7 @@ class AuthService:
 
     # ── Refresh ───────────────────────────────────────────────────────────────
 
-    def refresh(self, raw_refresh_token: str) -> AuthResponse:
+    def refresh(self, raw_refresh_token: str) -> tuple[AuthResponse, str]:
         token_hash = _hash_token(raw_refresh_token)
         token = self.repo.get_refresh_token(token_hash)
 
@@ -150,16 +150,21 @@ class AuthService:
         if token.expires_at.replace(tzinfo=UTC) < datetime.now(UTC):
             raise AuthError("Session expired. Please log in again.", 401)
 
-        # Rotate: revoke old token, issue new one
+        # Rotate: revoke old, issue new
         self.repo.revoke_refresh_token(token)
         new_access = create_access_token(str(token.user_id))
+
+        raw_refresh, refresh_hash = create_refresh_token()
+        expires_at = datetime.now(UTC) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+        self.repo.create_refresh_token(token.user_id, refresh_hash, expires_at)
+
         self.db.commit()
 
         user = self.repo.get_by_id(token.user_id)
         return AuthResponse(
             user=UserPublicSchema.model_validate(user),
             access_token=new_access,
-        )
+        ), raw_refresh
 
     # ── Logout ────────────────────────────────────────────────────────────────
 
