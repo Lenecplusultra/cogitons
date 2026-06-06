@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { api, type SubjectListItem, type SubjectDetail } from "@/lib/api";
+import { api, type SubjectListItem } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 
 type ModalState =
