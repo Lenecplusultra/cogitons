@@ -69,6 +69,31 @@ def get_current_verified_user(
     return current_user
 
 
+def get_optional_current_user(
+    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
+    db: Session = Depends(get_db),
+) -> User | None:
+    """
+    Returns the authenticated User if a valid token is present.
+    Returns None if no token is provided — does not raise.
+    Used on public endpoints that show different content to logged-in users
+    (e.g. current_user_voted on discussions).
+    """
+    if not credentials:
+        return None
+
+    user_id = decode_access_token(credentials.credentials)
+    if not user_id:
+        return None
+
+    repo = UserRepository(db)
+    user = repo.get_by_id(user_id)  # type: ignore[arg-type]
+    if not user or user.status == "suspended":
+        return None
+
+    return user
+
+
 def get_current_admin(
     current_user: User = Depends(get_current_verified_user),
 ) -> User:
