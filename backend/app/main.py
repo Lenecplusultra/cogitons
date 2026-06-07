@@ -3,8 +3,10 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.auth import router as auth_router
 from app.api.discussions import router as discussions_router
+from app.api.feed import router as feed_router
 from app.api.health import router as health_router
 from app.api.responses import router as responses_router
+from app.api.search import router as search_router
 from app.api.subjects import router as subjects_router
 from app.api.users import router as users_router
 from app.api.votes import router as votes_router
@@ -37,7 +39,11 @@ app.include_router(auth_router, prefix=API_PREFIX, tags=["auth"])
 
 app.include_router(discussions_router, prefix=API_PREFIX, tags=["discussions"])
 
+app.include_router(feed_router, prefix=API_PREFIX, tags=["feed"])
+
 app.include_router(responses_router, prefix=API_PREFIX, tags=["responses"])
+
+app.include_router(search_router, prefix=API_PREFIX, tags=["search"])
 
 app.include_router(subjects_router, prefix=API_PREFIX, tags=["subjects"])
 
