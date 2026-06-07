@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { api, type DiscussionDetail } from "@/lib/api";
+import { api, type DiscussionDetail, type ResponseItem } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 
 function formatDate(iso: string): string {
@@ -13,6 +13,125 @@ function formatDate(iso: string): string {
     year: "numeric",
   });
 }
+
+// ── Response card ─────────────────────────────────────────────────────────────
+
+function ResponseCard({
+  response,
+  currentUserId,
+  onUpdated,
+  onDeleted,
+}: {
+  response: ResponseItem;
+  currentUserId: string | undefined;
+  onUpdated: (id: string, body: string) => void;
+  onDeleted: (id: string) => void;
+}) {
+  const isOwner = currentUserId === response.author.id;
+  const [editing, setEditing] = useState(false);
+  const [editBody, setEditBody] = useState(response.body);
+  const [saving, setSaving] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  async function handleSave() {
+    if (!editBody.trim()) { setEditError("Body is required."); return; }
+    setSaving(true);
+    setEditError(null);
+    const res = await api.responses.update(response.id, editBody.trim());
+    setSaving(false);
+    if (res.success) {
+      onUpdated(response.id, res.data.body);
+      setEditing(false);
+    } else {
+      setEditError(res.error.message);
+    }
+  }
+
+  async function handleDelete() {
+    if (!confirm("Delete this response?")) return;
+    setDeleting(true);
+    const res = await api.responses.delete(response.id);
+    setDeleting(false);
+    if (res.success) {
+      onDeleted(response.id);
+    }
+  }
+
+  return (
+    <div className="bg-white border border-gray-200 rounded-lg p-5">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2 text-sm text-gray-500">
+          <span className="font-medium text-gray-700">{response.author.username}</span>
+          <span>·</span>
+          <span>{formatDate(response.created_at)}</span>
+          {response.edited && (
+            <span className="text-xs text-gray-300">edited</span>
+          )}
+        </div>
+        {isOwner && !editing && (
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setEditing(true)}
+              className="text-xs text-[#2E6DA4] hover:underline"
+            >
+              Edit
+            </button>
+            <button
+              onClick={handleDelete}
+              disabled={deleting}
+              className="text-xs text-red-400 hover:text-red-600 disabled:opacity-50"
+            >
+              {deleting ? "Deleting…" : "Delete"}
+            </button>
+          </div>
+        )}
+      </div>
+
+      {editError && (
+        <div className="mb-3 px-3 py-2 bg-red-50 border border-red-200 rounded text-xs text-red-600">
+          {editError}
+        </div>
+      )}
+
+      {editing ? (
+        <>
+          <textarea
+            value={editBody}
+            onChange={(e) => setEditBody(e.target.value)}
+            rows={4}
+            className="w-full px-3 py-2 border border-gray-200 rounded text-sm focus:outline-none focus:border-[#2E6DA4] transition-colors resize-none"
+          />
+          <div className="flex items-center justify-end gap-2 mt-2">
+            <button
+              onClick={() => { setEditing(false); setEditBody(response.body); setEditError(null); }}
+              className="px-3 py-1.5 text-xs text-gray-500 hover:text-gray-700"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="px-3 py-1.5 rounded text-xs font-medium text-white bg-[#2E6DA4] hover:opacity-90 disabled:opacity-50"
+            >
+              {saving ? "Saving…" : "Save"}
+            </button>
+          </div>
+        </>
+      ) : (
+        <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+          {response.body}
+        </p>
+      )}
+
+      <div className="mt-3 pt-3 border-t border-gray-50 text-xs text-gray-400">
+        👍 {response.useful_count} useful
+      </div>
+    </div>
+  );
+}
+
+// ── Main page ─────────────────────────────────────────────────────────────────
 
 export default function DiscussionPage() {
   const params = useParams();
@@ -24,16 +143,24 @@ export default function DiscussionPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Edit state
+  // Discussion edit state
   const [editing, setEditing] = useState(false);
   const [editTitle, setEditTitle] = useState("");
   const [editBody, setEditBody] = useState("");
   const [saving, setSaving] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
-
-  // Delete state
   const [deleting, setDeleting] = useState(false);
 
+  // Responses state
+  const [responses, setResponses] = useState<ResponseItem[]>([]);
+  const [responsePage, setResponsePage] = useState(1);
+  const [responseTotalPages, setResponseTotalPages] = useState(1);
+  const [responsesLoading, setResponsesLoading] = useState(false);
+  const [newResponseBody, setNewResponseBody] = useState("");
+  const [submittingResponse, setSubmittingResponse] = useState(false);
+  const [responseError, setResponseError] = useState<string | null>(null);
+
+  // Load discussion
   useEffect(() => {
     if (!id) return;
     api.discussions.get(id).then((res) => {
@@ -48,21 +175,30 @@ export default function DiscussionPage() {
     });
   }, [id]);
 
+  // Load responses
+  useEffect(() => {
+    if (!id) return;
+    setResponsesLoading(true);
+    api.responses.list(id, responsePage).then((res) => {
+      if (res.success) {
+        setResponses(res.data.items);
+        setResponseTotalPages(res.data.pagination.total_pages);
+      }
+      setResponsesLoading(false);
+    });
+  }, [id, responsePage]);
+
   async function handleSaveEdit() {
     if (!discussion) return;
     if (!editTitle.trim()) { setEditError("Title is required."); return; }
     if (!editBody.trim()) { setEditError("Body is required."); return; }
-
     setSaving(true);
     setEditError(null);
-
     const res = await api.discussions.update(discussion.id, {
       title: editTitle.trim(),
       body: editBody.trim(),
     });
-
     setSaving(false);
-
     if (res.success) {
       setDiscussion((prev) =>
         prev ? { ...prev, title: res.data.title, body: res.data.body, edited: true } : prev
@@ -73,19 +209,52 @@ export default function DiscussionPage() {
     }
   }
 
-  async function handleDelete() {
+  async function handleDeleteDiscussion() {
     if (!discussion) return;
-    if (!confirm("Delete this discussion? This cannot be undone.")) return;
-
+    if (!confirm("Delete this discussion? All responses will also be deleted.")) return;
     setDeleting(true);
     const res = await api.discussions.delete(discussion.id);
     setDeleting(false);
-
     if (res.success) {
       router.push(`/subjects/${discussion.subject.slug}`);
     } else {
       setError(res.error.message);
     }
+  }
+
+  async function handleSubmitResponse() {
+    if (!newResponseBody.trim()) { setResponseError("Response cannot be empty."); return; }
+    setSubmittingResponse(true);
+    setResponseError(null);
+    const res = await api.responses.create(id, newResponseBody.trim());
+    setSubmittingResponse(false);
+    if (res.success) {
+      setNewResponseBody("");
+      // Reload responses and update count
+      const updated = await api.responses.list(id, responsePage);
+      if (updated.success) {
+        setResponses(updated.data.items);
+        setResponseTotalPages(updated.data.pagination.total_pages);
+      }
+      setDiscussion((prev) =>
+        prev ? { ...prev, response_count: prev.response_count + 1 } : prev
+      );
+    } else {
+      setResponseError(res.error.message);
+    }
+  }
+
+  function handleResponseUpdated(responseId: string, newBody: string) {
+    setResponses((prev) =>
+      prev.map((r) => r.id === responseId ? { ...r, body: newBody, edited: true } : r)
+    );
+  }
+
+  function handleResponseDeleted(responseId: string) {
+    setResponses((prev) => prev.filter((r) => r.id !== responseId));
+    setDiscussion((prev) =>
+      prev ? { ...prev, response_count: Math.max(0, prev.response_count - 1) } : prev
+    );
   }
 
   if (authLoading || loading) {
@@ -108,6 +277,7 @@ export default function DiscussionPage() {
   }
 
   const isOwner = user?.id === discussion.author.id;
+  const canRespond = !!user && user.email_verified && discussion.status !== "locked";
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -146,10 +316,9 @@ export default function DiscussionPage() {
         </div>
       </section>
 
-      {/* Body */}
       <section className="max-w-3xl mx-auto px-4 py-8">
+        {/* Discussion body */}
         <div className="bg-white border border-gray-200 rounded-lg p-6">
-
           {editError && (
             <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded text-sm text-red-600">
               {editError}
@@ -169,28 +338,26 @@ export default function DiscussionPage() {
             </p>
           )}
 
-          {/* Stats row */}
           <div className="flex items-center justify-between mt-6 pt-5 border-t border-gray-100">
             <div className="flex gap-4 text-sm text-gray-400">
               <span>👍 {discussion.useful_count} useful</span>
               <span>💬 {discussion.response_count} responses</span>
             </div>
 
-            {/* Owner controls — issue #58 */}
             {isOwner && (
               <div className="flex items-center gap-2">
                 {editing ? (
                   <>
                     <button
                       onClick={() => { setEditing(false); setEditError(null); }}
-                      className="px-3 py-1.5 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+                      className="px-3 py-1.5 text-sm text-gray-500 hover:text-gray-700"
                     >
                       Cancel
                     </button>
                     <button
                       onClick={handleSaveEdit}
                       disabled={saving}
-                      className="px-4 py-1.5 rounded text-sm font-medium text-white bg-[#2E6DA4] hover:opacity-90 disabled:opacity-50 transition-opacity"
+                      className="px-4 py-1.5 rounded text-sm font-medium text-white bg-[#2E6DA4] hover:opacity-90 disabled:opacity-50"
                     >
                       {saving ? "Saving…" : "Save"}
                     </button>
@@ -199,14 +366,14 @@ export default function DiscussionPage() {
                   <>
                     <button
                       onClick={() => setEditing(true)}
-                      className="px-3 py-1.5 text-sm text-[#2E6DA4] hover:underline transition-colors"
+                      className="px-3 py-1.5 text-sm text-[#2E6DA4] hover:underline"
                     >
                       Edit
                     </button>
                     <button
-                      onClick={handleDelete}
+                      onClick={handleDeleteDiscussion}
                       disabled={deleting}
-                      className="px-3 py-1.5 text-sm text-red-400 hover:text-red-600 disabled:opacity-50 transition-colors"
+                      className="px-3 py-1.5 text-sm text-red-400 hover:text-red-600 disabled:opacity-50"
                     >
                       {deleting ? "Deleting…" : "Delete"}
                     </button>
@@ -217,14 +384,114 @@ export default function DiscussionPage() {
           </div>
         </div>
 
-        {/* Responses placeholder — Phase 4 */}
+        {/* Responses section */}
         <div className="mt-8">
           <h2 className="text-base font-semibold text-[#1A3C5E] mb-4">
             Responses ({discussion.response_count})
           </h2>
-          <div className="border border-dashed border-gray-300 rounded-lg p-10 text-center">
-            <p className="text-gray-400 text-sm">Responses coming in Phase 4.</p>
-          </div>
+
+          {/* Response form */}
+          {canRespond && (
+            <div className="bg-white border border-gray-200 rounded-lg p-5 mb-5">
+              {responseError && (
+                <div className="mb-3 px-3 py-2 bg-red-50 border border-red-200 rounded text-sm text-red-600">
+                  {responseError}
+                </div>
+              )}
+              <textarea
+                value={newResponseBody}
+                onChange={(e) => setNewResponseBody(e.target.value)}
+                rows={4}
+                placeholder="Share your insight or perspective…"
+                className="w-full px-3 py-2.5 border border-gray-200 rounded text-sm focus:outline-none focus:border-[#2E6DA4] transition-colors resize-none"
+              />
+              <div className="flex justify-end mt-3">
+                <button
+                  onClick={handleSubmitResponse}
+                  disabled={submittingResponse}
+                  className="px-4 py-2 rounded text-sm font-medium text-white bg-[#2E6DA4] hover:opacity-90 disabled:opacity-50 transition-opacity"
+                >
+                  {submittingResponse ? "Posting…" : "Post response"}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {!user && (
+            <div className="mb-5 px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm text-gray-500">
+              <Link href="/login" className="text-[#2E6DA4] hover:underline">
+                Log in
+              </Link>{" "}
+              to join the discussion.
+            </div>
+          )}
+
+          {discussion.status === "locked" && (
+            <div className="mb-5 px-4 py-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-700">
+              This discussion is locked and no longer accepting responses.
+            </div>
+          )}
+
+          {/* Response list */}
+          {responsesLoading ? (
+            <div className="space-y-3">
+              {[1, 2].map((i) => (
+                <div key={i} className="bg-white border border-gray-200 rounded-lg p-5 animate-pulse">
+                  <div className="h-3 bg-gray-200 rounded w-1/4 mb-3" />
+                  <div className="h-4 bg-gray-100 rounded w-full" />
+                </div>
+              ))}
+            </div>
+          ) : responses.length === 0 ? (
+            <div className="border border-dashed border-gray-300 rounded-lg p-10 text-center">
+              <p className="text-gray-400 text-sm">No responses yet. Be the first to contribute.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {responses.map((r) => (
+                <ResponseCard
+                  key={r.id}
+                  response={r}
+                  currentUserId={user?.id}
+                  onUpdated={handleResponseUpdated}
+                  onDeleted={handleResponseDeleted}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Pagination */}
+          {responseTotalPages > 1 && (
+            <div className="flex items-center justify-center gap-1 mt-8">
+              <button
+                onClick={() => setResponsePage((p) => Math.max(1, p - 1))}
+                disabled={responsePage === 1}
+                className="px-3 py-1.5 rounded text-sm border border-gray-200 text-gray-500 hover:border-gray-300 disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                ←
+              </button>
+              {Array.from({ length: responseTotalPages }, (_, i) => i + 1).map((n) => (
+                <button
+                  key={n}
+                  onClick={() => setResponsePage(n)}
+                  className={`px-3 py-1.5 rounded text-sm border transition-colors ${
+                    n === responsePage
+                      ? "bg-[#1A3C5E] text-white border-[#1A3C5E]"
+                      : "border-gray-200 text-gray-500 hover:border-gray-300"
+                  }`}
+                >
+                  {n}
+                </button>
+              ))}
+              <button
+                onClick={() => setResponsePage((p) => Math.min(responseTotalPages, p + 1))}
+                disabled={responsePage === responseTotalPages}
+                className="px-3 py-1.5 rounded text-sm border border-gray-200 text-gray-500 hover:border-gray-300 disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                →
+              </button>
+            </div>
+          )}
         </div>
       </section>
     </main>

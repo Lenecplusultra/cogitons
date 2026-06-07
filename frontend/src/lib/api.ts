@@ -131,6 +131,25 @@ export const api = {
     delete: (id: string) =>
       request(`/discussions/${id}`, { method: "DELETE" }),
   },
+
+  responses: {
+    list: (discussionId: string, page = 1, pageSize = 20) =>
+      request<ResponseListData>(
+        `/discussions/${discussionId}/responses?page=${page}&page_size=${pageSize}`
+      ),
+    create: (discussionId: string, body: string) =>
+      request<{ id: string; body: string; status: string }>(
+        `/discussions/${discussionId}/responses`,
+        { method: "POST", body: JSON.stringify({ body }) }
+      ),
+    update: (id: string, body: string) =>
+      request<{ id: string; body: string; edited: boolean }>(
+        `/responses/${id}`,
+        { method: "PATCH", body: JSON.stringify({ body }) }
+      ),
+    delete: (id: string) =>
+      request(`/responses/${id}`, { method: "DELETE" }),
+  },
 };
 
 export interface UserMe {
@@ -206,6 +225,27 @@ export interface DiscussionDetail {
 
 export interface DiscussionListData {
   items: DiscussionCard[];
+  pagination: {
+    page: number;
+    page_size: number;
+    total: number;
+    total_pages: number;
+  };
+}
+
+export interface ResponseItem {
+  id: string;
+  author: DiscussionAuthor;
+  body: string;
+  useful_count: number;
+  current_user_voted: boolean;
+  edited: boolean;
+  status: string;
+  created_at: string;
+}
+
+export interface ResponseListData {
+  items: ResponseItem[];
   pagination: {
     page: number;
     page_size: number;
