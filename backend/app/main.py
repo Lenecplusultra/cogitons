@@ -7,6 +7,7 @@ from app.api.health import router as health_router
 from app.api.responses import router as responses_router
 from app.api.subjects import router as subjects_router
 from app.api.users import router as users_router
+from app.api.votes import router as votes_router
 from app.core.config import settings
 
 app = FastAPI(
@@ -34,13 +35,16 @@ app.include_router(health_router, prefix=API_PREFIX, tags=["health"])
 
 app.include_router(auth_router, prefix=API_PREFIX, tags=["auth"])
 
-app.include_router(users_router, prefix=API_PREFIX, tags=["users"])
-
-app.include_router(subjects_router, prefix=API_PREFIX, tags=["subjects"])
-
 app.include_router(discussions_router, prefix=API_PREFIX, tags=["discussions"])
 
 app.include_router(responses_router, prefix=API_PREFIX, tags=["responses"])
+
+app.include_router(subjects_router, prefix=API_PREFIX, tags=["subjects"])
+
+app.include_router(users_router, prefix=API_PREFIX, tags=["users"])
+
+app.include_router(votes_router, prefix=API_PREFIX, tags=["votes"])
+
 
 # Phase 1+ routers will be added here as they are built:
 # from app.api.auth import router as auth_router
