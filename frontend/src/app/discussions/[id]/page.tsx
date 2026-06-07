@@ -19,13 +19,17 @@ function formatDate(iso: string): string {
 function ResponseCard({
   response,
   currentUserId,
+  canVote,
   onUpdated,
   onDeleted,
+  onVoted,
 }: {
   response: ResponseItem;
   currentUserId: string | undefined;
+  canVote: boolean;
   onUpdated: (id: string, body: string) => void;
   onDeleted: (id: string) => void;
+  onVoted: (id: string, voted: boolean, useful_count: number) => void;
 }) {
   const isOwner = currentUserId === response.author.id;
   const [editing, setEditing] = useState(false);
@@ -33,6 +37,7 @@ function ResponseCard({
   const [saving, setSaving] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [voting, setVoting] = useState(false);
 
   async function handleSave() {
     if (!editBody.trim()) { setEditError("Body is required."); return; }
@@ -53,9 +58,15 @@ function ResponseCard({
     setDeleting(true);
     const res = await api.responses.delete(response.id);
     setDeleting(false);
-    if (res.success) {
-      onDeleted(response.id);
-    }
+    if (res.success) onDeleted(response.id);
+  }
+
+  async function handleVote() {
+    if (!canVote) return;
+    setVoting(true);
+    const res = await api.responses.vote(response.id);
+    setVoting(false);
+    if (res.success) onVoted(response.id, res.data.voted, res.data.useful_count);
   }
 
   return (
@@ -124,8 +135,20 @@ function ResponseCard({
         </p>
       )}
 
-      <div className="mt-3 pt-3 border-t border-gray-50 text-xs text-gray-400">
-        👍 {response.useful_count} useful
+      <div className="mt-3 pt-3 border-t border-gray-50">
+        <button
+          onClick={handleVote}
+          disabled={!canVote || voting}
+          className={`flex items-center gap-1.5 text-xs transition-colors ${
+            response.current_user_voted
+              ? "text-[#2E6DA4] font-medium"
+              : canVote
+              ? "text-gray-400 hover:text-[#2E6DA4]"
+              : "text-gray-300 cursor-default"
+          }`}
+        >
+          👍 {response.useful_count} useful
+        </button>
       </div>
     </div>
   );
@@ -150,6 +173,7 @@ export default function DiscussionPage() {
   const [saving, setSaving] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [discussionVoting, setDiscussionVoting] = useState(false);
 
   // Responses state
   const [responses, setResponses] = useState<ResponseItem[]>([]);
@@ -222,6 +246,20 @@ export default function DiscussionPage() {
     }
   }
 
+  async function handleDiscussionVote() {
+    if (!discussion || !user || !user.email_verified) return;
+    setDiscussionVoting(true);
+    const res = await api.discussions.vote(discussion.id);
+    setDiscussionVoting(false);
+    if (res.success) {
+      setDiscussion((prev) =>
+        prev
+          ? { ...prev, useful_count: res.data.useful_count, current_user_voted: res.data.voted }
+          : prev
+      );
+    }
+  }
+
   async function handleSubmitResponse() {
     if (!newResponseBody.trim()) { setResponseError("Response cannot be empty."); return; }
     setSubmittingResponse(true);
@@ -254,6 +292,14 @@ export default function DiscussionPage() {
     setResponses((prev) => prev.filter((r) => r.id !== responseId));
     setDiscussion((prev) =>
       prev ? { ...prev, response_count: Math.max(0, prev.response_count - 1) } : prev
+    );
+  }
+
+  function handleResponseVoted(responseId: string, voted: boolean, useful_count: number) {
+    setResponses((prev) =>
+      prev.map((r) =>
+        r.id === responseId ? { ...r, current_user_voted: voted, useful_count } : r
+      )
     );
   }
 
@@ -339,9 +385,21 @@ export default function DiscussionPage() {
           )}
 
           <div className="flex items-center justify-between mt-6 pt-5 border-t border-gray-100">
-            <div className="flex gap-4 text-sm text-gray-400">
-              <span>👍 {discussion.useful_count} useful</span>
-              <span>💬 {discussion.response_count} responses</span>
+            <div className="flex gap-4 text-sm">
+              <button
+                onClick={handleDiscussionVote}
+                disabled={!user || !user.email_verified || discussionVoting}
+                className={`flex items-center gap-1.5 transition-colors ${
+                  discussion.current_user_voted
+                    ? "text-[#2E6DA4] font-medium"
+                    : user && user.email_verified
+                    ? "text-gray-400 hover:text-[#2E6DA4]"
+                    : "text-gray-300 cursor-default"
+                }`}
+              >
+                👍 {discussion.useful_count} useful
+              </button>
+              <span className="text-gray-400">💬 {discussion.response_count} responses</span>
             </div>
 
             {isOwner && (
@@ -453,8 +511,10 @@ export default function DiscussionPage() {
                   key={r.id}
                   response={r}
                   currentUserId={user?.id}
+                  canVote={!!user && !!user.email_verified}
                   onUpdated={handleResponseUpdated}
                   onDeleted={handleResponseDeleted}
+                  onVoted={handleResponseVoted}
                 />
               ))}
             </div>

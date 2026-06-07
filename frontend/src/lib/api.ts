@@ -130,6 +130,11 @@ export const api = {
       ),
     delete: (id: string) =>
       request(`/discussions/${id}`, { method: "DELETE" }),
+    vote: (id: string) =>
+      request<{ voted: boolean; useful_count: number }>(
+        `/discussions/${id}/vote`,
+        { method: "POST" }
+      ),
   },
 
   responses: {
@@ -149,6 +154,11 @@ export const api = {
       ),
     delete: (id: string) =>
       request(`/responses/${id}`, { method: "DELETE" }),
+    vote: (id: string) =>
+      request<{ voted: boolean; useful_count: number }>(
+        `/responses/${id}/vote`,
+        { method: "POST" }
+      ),
   },
 };
 
