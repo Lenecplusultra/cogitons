@@ -44,15 +44,15 @@ class ModerationRepository:
     def list_reports(
         self, status: str = "pending", page: int = 1, page_size: int = 20
     ) -> tuple[list[Report], int]:
+        from sqlalchemy import func
+        from sqlalchemy import select as sel
+
         base = (
             select(Report)
             .options(joinedload(Report.reporter))
             .where(Report.status == status)
             .order_by(Report.created_at.desc())
         )
-        from sqlalchemy import func
-        from sqlalchemy import select as sel
-
         total_stmt = sel(func.count()).select_from(
             sel(Report).where(Report.status == status).subquery()
         )
@@ -75,19 +75,24 @@ class ModerationRepository:
     # ── Content ───────────────────────────────────────────────────────────────
 
     def get_discussion(self, discussion_id: uuid.UUID) -> Discussion | None:
-        return self.db.get(Discussion, discussion_id)
+        stmt = (
+            select(Discussion)
+            .options(joinedload(Discussion.author))
+            .where(Discussion.id == discussion_id)
+        )
+        return self.db.scalars(stmt).first()
 
     def get_response(self, response_id: uuid.UUID) -> Response | None:
-        return self.db.get(Response, response_id)
+        stmt = (
+            select(Response).options(joinedload(Response.author)).where(Response.id == response_id)
+        )
+        return self.db.scalars(stmt).first()
 
     def remove_discussion(self, discussion: Discussion) -> None:
         discussion.status = "removed"
-        # cascade soft delete to responses
-        from app.models.response import Response as Resp
-
-        stmt = select(Resp).where(
-            Resp.discussion_id == discussion.id,
-            Resp.status != "removed",
+        stmt = select(Response).where(
+            Response.discussion_id == discussion.id,
+            Response.status != "removed",
         )
         for r in self.db.scalars(stmt).all():
             r.status = "removed"
@@ -113,17 +118,16 @@ class ModerationRepository:
         return self.db.get(User, user_id)
 
     def suspend_user(self, user: User) -> User:
-        user.status = "suspended"
-        # revoke all refresh tokens
+        from datetime import datetime
+
         from app.models.token import RefreshToken
 
+        user.status = "suspended"
+        now = datetime.now(UTC)
         stmt = select(RefreshToken).where(
             RefreshToken.user_id == user.id,
             RefreshToken.revoked_at.is_(None),
         )
-        from datetime import datetime
-
-        now = datetime.now(UTC)
         for token in self.db.scalars(stmt).all():
             token.revoked_at = now
         self.db.flush()
@@ -156,3 +160,80 @@ class ModerationRepository:
         self.db.add(log)
         self.db.flush()
         return log
+
+    def get_latest_log_for_target(self, target_id: uuid.UUID) -> ModerationLog | None:
+        stmt = (
+            select(ModerationLog)
+            .options(joinedload(ModerationLog.admin))
+            .where(ModerationLog.target_id == target_id)
+            .order_by(ModerationLog.created_at.desc())
+            .limit(1)
+        )
+        return self.db.scalars(stmt).first()
+
+    # ── Report context ────────────────────────────────────────────────────────
+
+    def get_report_context(self, report_id: uuid.UUID) -> dict | None:
+        report = self.get_report_by_id(report_id)
+        if not report:
+            return None
+
+        if report.target_type == "discussion":
+            discussion = self.get_discussion(report.target_id)
+            if not discussion:
+                result: dict = {
+                    "target_type": "discussion",
+                    "found": False,
+                    "status": None,
+                    "body": None,
+                    "author": None,
+                    "discussion_id": None,
+                    "anchor": None,
+                }
+            else:
+                result = {
+                    "target_type": "discussion",
+                    "found": True,
+                    "status": discussion.status,
+                    "body": discussion.body,
+                    "author": discussion.author.username,
+                    "discussion_id": str(discussion.id),
+                    "anchor": None,
+                }
+        else:
+            response = self.get_response(report.target_id)
+            if not response:
+                result = {
+                    "target_type": "response",
+                    "found": False,
+                    "status": None,
+                    "body": None,
+                    "author": None,
+                    "discussion_id": None,
+                    "anchor": None,
+                }
+            else:
+                result = {
+                    "target_type": "response",
+                    "found": True,
+                    "status": response.status,
+                    "body": response.body,
+                    "author": response.author.username,
+                    "discussion_id": str(response.discussion_id),
+                    "anchor": f"response-{response.id}",
+                }
+
+        # Attach most recent moderation action on this target
+        log = self.get_latest_log_for_target(report.target_id)
+        result["action_taken"] = (
+            {
+                "action": log.action.replace("_", " "),
+                "admin": log.admin.username,
+                "notes": log.notes,
+                "at": log.created_at.isoformat(),
+            }
+            if log
+            else None
+        )
+
+        return result

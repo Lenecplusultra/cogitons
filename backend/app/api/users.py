@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.core.dependencies import get_current_verified_user
+from app.core.dependencies import get_current_verified_user, get_optional_current_user
 from app.models.user import User
 from app.repositories.user_repository import UserRepository
 from app.schemas.user import UpdateMeRequest, UpdateMeResponse, UserMeResponse, UserPublicResponse
@@ -99,33 +99,26 @@ def update_me(
 # ---------------------------------------------------------------------------
 
 
-@router.get(
-    "/{username}",
-    response_model=dict,
-    summary="Get public profile by username",
-)
-def get_user_by_username(username: str, db: Session = Depends(get_db)) -> dict:
-    """
-    Returns a public user profile by username.
-
-    Public endpoint — no authentication required.
-    Email, role, and status are never exposed here.
-    Removed accounts return 404.
-    """
+@router.get("/{username}", response_model=dict, summary="Get public profile by username")
+def get_user_by_username(
+    username: str,
+    db: Session = Depends(get_db),
+    current_user: User | None = Depends(get_optional_current_user),
+) -> dict:
     repo = UserRepository(db)
     user = repo.get_by_username(username)
 
     if not user or user.status == "removed":
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail={
-                "success": False,
-                "error": {
-                    "code": "NOT_FOUND",
-                    "message": "User not found.",
-                },
-            },
+            detail={"success": False, "error": {"code": "NOT_FOUND", "message": "User not found."}},
         )
 
-    data = UserPublicResponse.model_validate(user)
-    return {"success": True, "data": data.model_dump()}
+    data = UserPublicResponse.model_validate(user).model_dump()
+
+    # Expose status and role to admins only
+    if current_user and current_user.role == "admin":
+        data["status"] = user.status
+        data["role"] = user.role
+
+    return {"success": True, "data": data}

@@ -209,3 +209,13 @@ class ModerationService:
         )
         self.db.commit()
         return {"id": str(user.id), "status": user.status}
+
+    # ── Admin: restore user ───────────────────────────────────────────────────
+
+    def get_report_context(self, report_id: uuid.UUID) -> dict:
+        context = self.repo.get_report_context(report_id)
+        if not context:
+            raise HTTPException(
+                status_code=404, detail={"code": "NOT_FOUND", "message": "Report not found."}
+            )
+        return context
