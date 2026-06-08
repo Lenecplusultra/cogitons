@@ -160,6 +160,15 @@ export const api = {
         { method: "POST" }
       ),
   },
+
+  search: {
+    query: (q: string) =>
+      request<SearchData>(`/search?q=${encodeURIComponent(q)}`),
+  },
+
+  feed: {
+    get: () => request<FeedData>("/feed"),
+  },
 };
 
 export interface UserMe {
@@ -262,4 +271,53 @@ export interface ResponseListData {
     total: number;
     total_pages: number;
   };
+}
+
+export interface SearchSubjectResult {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  discussion_count: number;
+}
+
+export interface SearchDiscussionResult {
+  id: string;
+  title: string;
+  subject: { title: string; slug: string };
+  author: { username: string };
+  useful_count: number;
+  response_count: number;
+  created_at: string;
+}
+
+export interface SearchData {
+  query: string;
+  subjects: SearchSubjectResult[];
+  discussions: SearchDiscussionResult[];
+  total_subjects: number;
+  total_discussions: number;
+}
+
+export interface FeedSubject {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  discussion_count: number;
+}
+
+export interface FeedDiscussion {
+  id: string;
+  title: string;
+  subject: { title: string; slug: string };
+  author: { username: string };
+  useful_count: number;
+  response_count: number;
+  created_at: string;
+}
+
+export interface FeedData {
+  featured_subjects: FeedSubject[];
+  recent_discussions: FeedDiscussion[];
 }

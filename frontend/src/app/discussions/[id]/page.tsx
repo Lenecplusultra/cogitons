@@ -1,3 +1,4 @@
+// frontend/src/app/discussions/[id]/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -20,6 +21,8 @@ function ResponseCard({
   response,
   currentUserId,
   canVote,
+  isGuest,
+  onAuthRequired,
   onUpdated,
   onDeleted,
   onVoted,
@@ -27,6 +30,8 @@ function ResponseCard({
   response: ResponseItem;
   currentUserId: string | undefined;
   canVote: boolean;
+  isGuest: boolean;
+  onAuthRequired: () => void;
   onUpdated: (id: string, body: string) => void;
   onDeleted: (id: string) => void;
   onVoted: (id: string, voted: boolean, useful_count: number) => void;
@@ -62,7 +67,10 @@ function ResponseCard({
   }
 
   async function handleVote() {
-    if (!canVote) return;
+    if (!canVote) {
+      if (isGuest) { onAuthRequired(); return; }
+      return;
+    }
     setVoting(true);
     const res = await api.responses.vote(response.id);
     setVoting(false);
@@ -138,11 +146,11 @@ function ResponseCard({
       <div className="mt-3 pt-3 border-t border-gray-50">
         <button
           onClick={handleVote}
-          disabled={!canVote || voting}
+          disabled={voting}
           className={`flex items-center gap-1.5 text-xs transition-colors ${
             response.current_user_voted
               ? "text-[#2E6DA4] font-medium"
-              : canVote
+              : canVote || isGuest
               ? "text-gray-400 hover:text-[#2E6DA4]"
               : "text-gray-300 cursor-default"
           }`}
@@ -247,7 +255,8 @@ export default function DiscussionPage() {
   }
 
   async function handleDiscussionVote() {
-    if (!discussion || !user || !user.email_verified) return;
+    if (!user) { router.push(`/login?next=${encodeURIComponent(window.location.pathname)}`); return; }
+    if (!user.email_verified || !discussion) return;
     setDiscussionVoting(true);
     const res = await api.discussions.vote(discussion.id);
     setDiscussionVoting(false);
@@ -261,6 +270,7 @@ export default function DiscussionPage() {
   }
 
   async function handleSubmitResponse() {
+    if (!user) { router.push(`/login?next=${encodeURIComponent(window.location.pathname)}`); return; }
     if (!newResponseBody.trim()) { setResponseError("Response cannot be empty."); return; }
     setSubmittingResponse(true);
     setResponseError(null);
@@ -268,7 +278,6 @@ export default function DiscussionPage() {
     setSubmittingResponse(false);
     if (res.success) {
       setNewResponseBody("");
-      // Reload responses and update count
       const updated = await api.responses.list(id, responsePage);
       if (updated.success) {
         setResponses(updated.data.items);
@@ -388,11 +397,11 @@ export default function DiscussionPage() {
             <div className="flex gap-4 text-sm">
               <button
                 onClick={handleDiscussionVote}
-                disabled={!user || !user.email_verified || discussionVoting}
+                disabled={discussionVoting}
                 className={`flex items-center gap-1.5 transition-colors ${
                   discussion.current_user_voted
                     ? "text-[#2E6DA4] font-medium"
-                    : user && user.email_verified
+                    : !user || user.email_verified
                     ? "text-gray-400 hover:text-[#2E6DA4]"
                     : "text-gray-300 cursor-default"
                 }`}
@@ -448,8 +457,8 @@ export default function DiscussionPage() {
             Responses ({discussion.response_count})
           </h2>
 
-          {/* Response form */}
-          {canRespond && (
+          {/* Response form or auth prompt */}
+          {canRespond ? (
             <div className="bg-white border border-gray-200 rounded-lg p-5 mb-5">
               {responseError && (
                 <div className="mb-3 px-3 py-2 bg-red-50 border border-red-200 rounded text-sm text-red-600">
@@ -473,20 +482,20 @@ export default function DiscussionPage() {
                 </button>
               </div>
             </div>
-          )}
-
-          {!user && (
-            <div className="mb-5 px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm text-gray-500">
-              <Link href="/login" className="text-[#2E6DA4] hover:underline">
-                Log in
-              </Link>{" "}
-              to join the discussion.
-            </div>
-          )}
-
-          {discussion.status === "locked" && (
+          ) : discussion.status === "locked" ? (
             <div className="mb-5 px-4 py-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-700">
               This discussion is locked and no longer accepting responses.
+            </div>
+          ) : (
+            <div className="mb-5 px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm text-gray-500">
+              <Link href="/login" className="text-[#2E6DA4] hover:underline font-medium">
+                Log in
+              </Link>{" "}
+              or{" "}
+              <Link href="/signup" className="text-[#2E6DA4] hover:underline font-medium">
+                sign up
+              </Link>{" "}
+              to join the discussion.
             </div>
           )}
 
@@ -512,6 +521,8 @@ export default function DiscussionPage() {
                   response={r}
                   currentUserId={user?.id}
                   canVote={!!user && !!user.email_verified}
+                  isGuest={!user}
+                  onAuthRequired={() => router.push(`/login?next=${encodeURIComponent(window.location.pathname)}`)}
                   onUpdated={handleResponseUpdated}
                   onDeleted={handleResponseDeleted}
                   onVoted={handleResponseVoted}
