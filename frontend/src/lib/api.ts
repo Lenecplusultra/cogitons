@@ -13,7 +13,8 @@ type ApiResponse<T = unknown> =
 
 async function request<T>(
   path: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
+  retry = true
 ): Promise<ApiResponse<T>> {
   try {
     const headers: Record<string, string> = {
@@ -31,6 +32,26 @@ async function request<T>(
     });
 
     const json = await res.json();
+
+    if (res.status === 401 && retry) {
+      // Try to refresh the access token silently
+      const refreshRes = await fetch(`${BASE}/api/v1/auth/refresh`, {
+        method: "POST",
+        credentials: "include",
+      });
+      if (refreshRes.ok) {
+        const refreshJson = await refreshRes.json();
+        const newToken = refreshJson?.data?.access_token ?? refreshJson?.access_token;
+        if (newToken) {
+          _accessToken = newToken;
+          // Retry the original request once with the new token
+          return request<T>(path, options, false);
+        }
+      }
+      // Refresh failed — session is gone
+      _accessToken = null;
+      return { success: false, error: { code: "401", message: "Session expired. Please log in again." } };
+    }
 
     if (!res.ok) {
       const message =
@@ -160,6 +181,15 @@ export const api = {
         { method: "POST" }
       ),
   },
+
+  search: {
+    query: (q: string) =>
+      request<SearchData>(`/search?q=${encodeURIComponent(q)}`),
+  },
+
+  feed: {
+    get: () => request<FeedData>("/feed"),
+  },
 };
 
 export interface UserMe {
@@ -262,4 +292,53 @@ export interface ResponseListData {
     total: number;
     total_pages: number;
   };
+}
+
+export interface SearchSubjectResult {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  discussion_count: number;
+}
+
+export interface SearchDiscussionResult {
+  id: string;
+  title: string;
+  subject: { title: string; slug: string };
+  author: { username: string };
+  useful_count: number;
+  response_count: number;
+  created_at: string;
+}
+
+export interface SearchData {
+  query: string;
+  subjects: SearchSubjectResult[];
+  discussions: SearchDiscussionResult[];
+  total_subjects: number;
+  total_discussions: number;
+}
+
+export interface FeedSubject {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  discussion_count: number;
+}
+
+export interface FeedDiscussion {
+  id: string;
+  title: string;
+  subject: { title: string; slug: string };
+  author: { username: string };
+  useful_count: number;
+  response_count: number;
+  created_at: string;
+}
+
+export interface FeedData {
+  featured_subjects: FeedSubject[];
+  recent_discussions: FeedDiscussion[];
 }
