@@ -146,3 +146,17 @@ def restore_user(
     service = ModerationService(db)
     result = service.restore_user(admin_id=current_user.id, user_id=user_id, body=body)
     return {"success": True, "data": result}
+
+
+# ── Admin: restore user ───────────────────────────────────────────────────────
+
+
+@router.get("/admin/reports/{report_id}/context", response_model=dict)
+def get_report_context(
+    report_id: uuid.UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin),
+) -> dict:
+    service = ModerationService(db)
+    result = service.get_report_context(report_id)
+    return {"success": True, "data": result}
