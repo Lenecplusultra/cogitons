@@ -13,7 +13,8 @@ type ApiResponse<T = unknown> =
 
 async function request<T>(
   path: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
+  retry = true
 ): Promise<ApiResponse<T>> {
   try {
     const headers: Record<string, string> = {
@@ -31,6 +32,26 @@ async function request<T>(
     });
 
     const json = await res.json();
+
+    if (res.status === 401 && retry) {
+      // Try to refresh the access token silently
+      const refreshRes = await fetch(`${BASE}/api/v1/auth/refresh`, {
+        method: "POST",
+        credentials: "include",
+      });
+      if (refreshRes.ok) {
+        const refreshJson = await refreshRes.json();
+        const newToken = refreshJson?.data?.access_token ?? refreshJson?.access_token;
+        if (newToken) {
+          _accessToken = newToken;
+          // Retry the original request once with the new token
+          return request<T>(path, options, false);
+        }
+      }
+      // Refresh failed — session is gone
+      _accessToken = null;
+      return { success: false, error: { code: "401", message: "Session expired. Please log in again." } };
+    }
 
     if (!res.ok) {
       const message =

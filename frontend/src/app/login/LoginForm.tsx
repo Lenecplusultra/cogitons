@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { api, tokenStore } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 
-export default function LoginPage() {
+export default function LoginForm() {
   const router = useRouter();
   const { login } = useAuth();
   const [form, setForm] = useState({ email: "", password: "" });
