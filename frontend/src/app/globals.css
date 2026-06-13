@@ -12,11 +12,12 @@
 
 @layer base {
   :root {
-    --background: oklch(1 0 0);
+    /* Shadcn tokens */
+    --background: #F5F2ED;
     --foreground: oklch(0.145 0 0);
-    --card: oklch(1 0 0);
+    --card: #FFFFFF;
     --card-foreground: oklch(0.145 0 0);
-    --popover: oklch(1 0 0);
+    --popover: #FFFFFF;
     --popover-foreground: oklch(0.145 0 0);
     --primary: oklch(0.318 0.085 234.6);
     --primary-foreground: oklch(0.985 0 0);
@@ -27,12 +28,17 @@
     --accent: oklch(0.97 0 0);
     --accent-foreground: oklch(0.205 0 0);
     --destructive: oklch(0.577 0.245 27.325);
-    --border: oklch(0.922 0 0);
-    --input: oklch(0.922 0 0);
+    --border: #E8E3DB;
+    --input: #E8E3DB;
     --ring: oklch(0.318 0.085 234.6);
-    --radius: 0.625rem;
+    --radius: 0.75rem;
+
+    /* Brand */
     --brand-navy: #1A3C5E;
     --brand-blue: #2E6DA4;
+    --brand-blue-light: #EBF2FA;
+    --brand-warm-bg: #F5F2ED;
+    --brand-warm-border: #E8E3DB;
   }
 
   .dark {
@@ -63,6 +69,10 @@
     outline-color: color-mix(in oklch, var(--ring) 50%, transparent);
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     background-color: var(--background);
     color: var(--foreground);
@@ -72,5 +82,8 @@
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+  .font-serif {
+    font-family: Georgia, 'Times New Roman', serif;
   }
 }

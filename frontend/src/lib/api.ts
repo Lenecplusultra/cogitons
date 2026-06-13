@@ -190,6 +190,40 @@ export const api = {
   feed: {
     get: () => request<FeedData>("/feed"),
   },
+
+  stats: {
+    get: () => request<{ subjects: number; discussions: number; members: number }>("/stats"),
+  },
+
+  moderation: {
+    submitReport: (body: { target_type: "discussion" | "response"; target_id: string; reason: ReportReason; details?: string }) =>
+      request("/reports", { method: "POST", body: JSON.stringify(body) }),
+
+    listReports: (status: "pending" | "dismissed" | "actioned" = "pending", page = 1) =>
+      request<ReportQueueData>(`/admin/reports?status=${status}&page=${page}&page_size=20`),
+
+    dismissReport: (reportId: string, notes?: string) =>
+      request(`/admin/reports/${reportId}/dismiss`, { method: "POST", body: JSON.stringify({ notes }) }),
+
+    removeContent: (body: { target_type: "discussion" | "response"; target_id: string; report_id?: string; notes?: string }) =>
+      request("/admin/content/remove", { method: "POST", body: JSON.stringify(body) }),
+
+    lockDiscussion: (discussionId: string, body: { report_id?: string; notes?: string }) =>
+      request(`/admin/discussions/${discussionId}/lock`, { method: "POST", body: JSON.stringify(body) }),
+
+    unlockDiscussion: (discussionId: string, body: { notes?: string }) =>
+      request(`/admin/discussions/${discussionId}/unlock`, { method: "POST", body: JSON.stringify(body) }),
+
+    suspendUser: (userId: string, body: { report_id?: string; notes?: string }) =>
+      request(`/admin/users/${userId}/suspend`, { method: "POST", body: JSON.stringify(body) }),
+
+    restoreUser: (userId: string, body: { notes?: string }) =>
+      request(`/admin/users/${userId}/restore`, { method: "POST", body: JSON.stringify(body) }),
+
+    getReportContext: (reportId: string) =>
+      request<ReportContext>(`/admin/reports/${reportId}/context`),
+  },
+
 };
 
 export interface UserMe {
@@ -209,6 +243,7 @@ export interface SubjectListItem {
   slug: string;
   description: string;
   discussion_count: number;
+  response_count: number;
   created_at: string;
 }
  
@@ -331,6 +366,7 @@ export interface FeedSubject {
 export interface FeedDiscussion {
   id: string;
   title: string;
+  body: string;
   subject: { title: string; slug: string };
   author: { username: string };
   useful_count: number;
@@ -338,7 +374,62 @@ export interface FeedDiscussion {
   created_at: string;
 }
 
+export interface FeedMostUseful {
+  id: string;
+  title: string;
+  subject: { title: string; slug: string };
+  useful_count: number;
+}
+ 
 export interface FeedData {
   featured_subjects: FeedSubject[];
   recent_discussions: FeedDiscussion[];
+  most_useful_this_week: FeedMostUseful[];
+}
+
+export type ReportReason =
+  | "spam"
+  | "harassment"
+  | "hate_speech"
+  | "dangerous_content"
+  | "misinformation"
+  | "privacy_violation"
+  | "off_topic"
+  | "other";
+
+export interface ReportQueueItem {
+  id: string;
+  reporter: { id: string; username: string };
+  target_type: "discussion" | "response";
+  target_id: string;
+  reason: string;
+  details: string | null;
+  status: string;
+  created_at: string;
+}
+
+export interface ReportQueueData {
+  items: ReportQueueItem[];
+  pagination: {
+    page: number;
+    page_size: number;
+    total: number;
+    total_pages: number;
+  };
+}
+
+export interface ReportContext {
+  target_type: "discussion" | "response";
+  found: boolean;
+  status?: string | null;
+  body?: string;
+  author?: string;
+  discussion_id?: string;
+  anchor?: string | null;
+  action_taken?: {
+    action: string;
+    admin: string;
+    notes: string | null;
+    at: string;
+  } | null;
 }

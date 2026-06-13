@@ -1,3 +1,4 @@
+// frontend/src/app/login/LoginForm.tsx
 "use client";
 
 import { useState } from "react";
@@ -9,11 +10,12 @@ import { useAuth } from "@/context/AuthContext";
 
 export default function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { login } = useAuth();
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState<string | null>(null);
+  const [suspended, setSuspended] = useState(false);
   const [loading, setLoading] = useState(false);
-  const searchParams = useSearchParams();
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
@@ -22,11 +24,17 @@ export default function LoginForm() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    setSuspended(false);
     setLoading(true);
     try {
       const res = await api.auth.login(form);
       if (!res.success) {
-        setError(res.error.message);
+        // Check for suspended account
+        if (res.error.message.toLowerCase().includes("suspended")) {
+          setSuspended(true);
+        } else {
+          setError(res.error.message);
+        }
         return;
       }
       const { access_token, user } = res.data as { access_token: string; user: import("@/lib/api").UserMe };
@@ -55,6 +63,16 @@ export default function LoginForm() {
 
         <div className="rounded-2xl border border-border bg-card p-8 shadow-sm">
           <h1 className="mb-6 text-xl font-semibold text-foreground">Log in</h1>
+
+          {suspended && (
+            <div className="mb-5 px-4 py-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm font-medium text-red-700 mb-1">Account suspended</p>
+              <p className="text-sm text-red-600">
+                Your account has been suspended for violating our community guidelines.
+                If you believe this is a mistake, please contact us.
+              </p>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
@@ -101,7 +119,7 @@ export default function LoginForm() {
             <Button
               type="submit"
               className="w-full"
-              disabled={loading}
+              disabled={loading || suspended}
               style={{ backgroundColor: "var(--brand-blue)", color: "#fff" }}
             >
               {loading ? "Logging in…" : "Log in"}

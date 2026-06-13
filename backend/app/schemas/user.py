@@ -1,3 +1,4 @@
+# backend/app/schemas/user.py
 from datetime import datetime
 from uuid import UUID
 
@@ -32,7 +33,7 @@ class UpdateMeRequest(BaseModel):
 
 
 # ---------------------------------------------------------------------------
-# Response schemas
+# Response schemas — account
 # ---------------------------------------------------------------------------
 
 
@@ -63,14 +64,88 @@ class UpdateMeResponse(BaseModel):
 
 class UserPublicResponse(BaseModel):
     """
-    Public profile returned for GET /users/{username}.
-
-    Email, role, and status are intentionally excluded.
+    Minimal public profile. Retained for any caller that only needs the
+    identity block (email, role, and status are intentionally excluded).
     """
 
     id: UUID
     username: str
     bio: str | None
     created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+# ---------------------------------------------------------------------------
+# Response schemas — public profile page (GET /users/{username})
+# ---------------------------------------------------------------------------
+
+
+class ProfileStats(BaseModel):
+    """The three header figures on the profile page."""
+
+    discussions: int
+    responses: int
+    useful_votes_received: int
+
+
+class ActiveInItem(BaseModel):
+    """One row of the 'Active in' sidebar — the user's activity per subject."""
+
+    subject_title: str
+    subject_slug: str
+    discussion_count: int
+    response_count: int
+
+
+class ProfileDiscussionItem(BaseModel):
+    """A card in the profile's Discussions tab."""
+
+    id: UUID
+    subject_title: str
+    subject_slug: str
+    title: str
+    body: str  # snippet, truncated at the service layer
+    useful_count: int
+    response_count: int
+    viewer_voted: bool = False
+    edited: bool
+    created_at: datetime
+
+
+class ProfileResponseItem(BaseModel):
+    """A card in the profile's Responses tab (carries its parent discussion)."""
+
+    id: UUID
+    discussion_id: UUID
+    discussion_title: str
+    subject_title: str
+    subject_slug: str
+    body: str  # snippet, truncated at the service layer
+    useful_count: int
+    viewer_voted: bool = False
+    edited: bool
+    created_at: datetime
+
+
+class UserProfileResponse(BaseModel):
+    """
+    Full payload for the public profile page. Tabs are a client-side toggle
+    over recent_discussions / recent_responses, so the whole page is one fetch.
+
+    status and role are populated only when the viewer is an admin; the service
+    strips them otherwise so the public contract is unchanged.
+    """
+
+    id: UUID
+    username: str
+    bio: str | None
+    created_at: datetime
+    stats: ProfileStats
+    active_in: list[ActiveInItem]
+    recent_discussions: list[ProfileDiscussionItem]
+    recent_responses: list[ProfileResponseItem]
+    status: str | None = None
+    role: str | None = None
 
     model_config = {"from_attributes": True}

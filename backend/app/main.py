@@ -8,6 +8,7 @@ from app.api.health import router as health_router
 from app.api.moderation import router as moderation_router
 from app.api.responses import router as responses_router
 from app.api.search import router as search_router
+from app.api.stats import router as stats_router
 from app.api.subjects import router as subjects_router
 from app.api.users import router as users_router
 from app.api.votes import router as votes_router
@@ -47,6 +48,8 @@ app.include_router(moderation_router, prefix=API_PREFIX, tags=["moderation"])
 app.include_router(responses_router, prefix=API_PREFIX, tags=["responses"])
 
 app.include_router(search_router, prefix=API_PREFIX, tags=["search"])
+
+app.include_router(stats_router, prefix=API_PREFIX, tags=["stats"])
 
 app.include_router(subjects_router, prefix=API_PREFIX, tags=["subjects"])
 

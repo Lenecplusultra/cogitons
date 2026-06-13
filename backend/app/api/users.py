@@ -5,7 +5,8 @@ from app.core.database import get_db
 from app.core.dependencies import get_current_verified_user, get_optional_current_user
 from app.models.user import User
 from app.repositories.user_repository import UserRepository
-from app.schemas.user import UpdateMeRequest, UpdateMeResponse, UserMeResponse, UserPublicResponse
+from app.schemas.user import UpdateMeRequest, UpdateMeResponse, UserMeResponse
+from app.services.user_service import UserService
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -105,20 +106,11 @@ def get_user_by_username(
     db: Session = Depends(get_db),
     current_user: User | None = Depends(get_optional_current_user),
 ) -> dict:
-    repo = UserRepository(db)
-    user = repo.get_by_username(username)
-
-    if not user or user.status == "removed":
+    service = UserService(db)
+    data = service.get_public_profile(username, current_user)
+    if data is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail={"success": False, "error": {"code": "NOT_FOUND", "message": "User not found."}},
         )
-
-    data = UserPublicResponse.model_validate(user).model_dump()
-
-    # Expose status and role to admins only
-    if current_user and current_user.role == "admin":
-        data["status"] = user.status
-        data["role"] = user.role
-
     return {"success": True, "data": data}
