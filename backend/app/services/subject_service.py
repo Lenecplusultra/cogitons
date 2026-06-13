@@ -57,6 +57,7 @@ class SubjectService:
                 slug=s.slug,
                 description=s.description,
                 discussion_count=subject_repository.get_discussion_count(db, s.id),
+                response_count=subject_repository.get_response_count(db, s.id),
                 created_at=s.created_at,
             )
             for s in subjects

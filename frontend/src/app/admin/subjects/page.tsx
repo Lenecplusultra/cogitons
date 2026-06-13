@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api, type SubjectListItem } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
+import Link from "next/link";
 
 type ModalState =
   | { type: "create" }
@@ -110,12 +111,20 @@ export default function AdminSubjectsPage() {
             <h1 className="text-2xl font-bold text-white">Manage Subjects</h1>
             <p className="text-white/50 text-sm mt-1">Admin</p>
           </div>
-          <button
-            onClick={openCreate}
-            className="px-4 py-2 bg-white rounded text-sm font-semibold text-[#1A3C5E] hover:opacity-90 transition-opacity"
-          >
-            + New Subject
-          </button>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/admin/moderation"
+              className="text-white/60 hover:text-white text-sm transition-colors"
+            >
+              Moderation queue
+            </Link>
+            <button
+              onClick={openCreate}
+              className="px-4 py-2 bg-white rounded text-sm font-semibold text-[#1A3C5E] hover:opacity-90 transition-opacity"
+            >
+              + New Subject
+            </button>
+          </div>
         </div>
       </div>
 

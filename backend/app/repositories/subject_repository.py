@@ -3,6 +3,8 @@ from uuid import UUID
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.models.discussion import Discussion
+from app.models.response import Response
 from app.models.subject import Subject, SubjectSlugHistory
 
 
@@ -47,13 +49,25 @@ class SubjectRepository:
         return db.scalar(q) is not None
 
     def get_discussion_count(self, db: Session, subject_id: UUID) -> int:
-        from app.models.discussion import Discussion  # avoid circular import
-
         return (
             db.scalar(
                 select(func.count(Discussion.id)).where(
                     Discussion.subject_id == subject_id,
                     Discussion.status == "published",
+                )
+            )
+            or 0
+        )
+
+    def get_response_count(self, db: Session, subject_id: UUID) -> int:
+        return (
+            db.scalar(
+                select(func.count(Response.id))
+                .join(Discussion, Response.discussion_id == Discussion.id)
+                .where(
+                    Discussion.subject_id == subject_id,
+                    Discussion.status == "published",
+                    Response.status == "published",
                 )
             )
             or 0

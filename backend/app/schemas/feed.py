@@ -31,6 +31,7 @@ class FeedDiscussionSubject(BaseModel):
 class FeedDiscussion(BaseModel):
     id: uuid.UUID
     title: str
+    body: str
     subject: FeedDiscussionSubject
     author: FeedDiscussionAuthor
     useful_count: int
@@ -40,6 +41,16 @@ class FeedDiscussion(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class FeedMostUseful(BaseModel):
+    id: uuid.UUID
+    title: str
+    subject: FeedDiscussionSubject
+    useful_count: int
+
+    model_config = {"from_attributes": True}
+
+
 class FeedResponse(BaseModel):
     featured_subjects: list[FeedSubject]
     recent_discussions: list[FeedDiscussion]
+    most_useful_this_week: list[FeedMostUseful]

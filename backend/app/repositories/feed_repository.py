@@ -1,5 +1,6 @@
 # backend/app/repositories/feed_repository.py
 import uuid
+from datetime import UTC
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, joinedload
@@ -77,3 +78,35 @@ class FeedRepository:
             Response.status == "published",
         )
         return self.db.scalar(stmt) or 0
+
+    def get_most_useful_this_week(self, limit: int = 5) -> list[Discussion]:
+        from datetime import datetime, timedelta
+
+        week_ago = datetime.now(UTC) - timedelta(days=7)
+
+        vote_count_subq = (
+            select(
+                Vote.target_id,
+                func.count(Vote.id).label("vote_count"),
+            )
+            .where(Vote.target_type == "discussion")
+            .group_by(Vote.target_id)
+            .subquery()
+        )
+
+        stmt = (
+            select(Discussion)
+            .options(
+                joinedload(Discussion.subject),
+            )
+            .outerjoin(vote_count_subq, Discussion.id == vote_count_subq.c.target_id)
+            .join(Subject, Discussion.subject_id == Subject.id)
+            .where(
+                Discussion.status == "published",
+                Subject.status == "active",
+                Discussion.created_at >= week_ago,
+            )
+            .order_by(func.coalesce(vote_count_subq.c.vote_count, 0).desc())
+            .limit(limit)
+        )
+        return list(self.db.scalars(stmt).unique().all())
