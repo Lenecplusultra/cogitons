@@ -171,6 +171,16 @@ class ModerationRepository:
         )
         return self.db.scalars(stmt).first()
 
+    def get_log_for_report(self, report_id: uuid.UUID) -> ModerationLog | None:
+        stmt = (
+            select(ModerationLog)
+            .options(joinedload(ModerationLog.admin))
+            .where(ModerationLog.report_id == report_id)
+            .order_by(ModerationLog.created_at.desc())
+            .limit(1)
+        )
+        return self.db.scalars(stmt).first()
+
     # ── Report context ────────────────────────────────────────────────────────
 
     def get_report_context(self, report_id: uuid.UUID) -> dict | None:
@@ -223,11 +233,10 @@ class ModerationRepository:
                     "anchor": f"response-{response.id}",
                 }
 
-        # Attach most recent moderation action on this target
-        log = self.get_latest_log_for_target(report.target_id)
+        log = self.get_log_for_report(report.id)
         result["action_taken"] = (
             {
-                "action": log.action.replace("_", " "),
+                "action": log.action,
                 "admin": log.admin.username,
                 "notes": log.notes,
                 "at": log.created_at.isoformat(),

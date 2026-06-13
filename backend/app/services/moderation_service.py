@@ -135,6 +135,13 @@ class ModerationService:
                 status_code=404, detail={"code": "NOT_FOUND", "message": "Discussion not found."}
             )
         self.repo.lock_discussion(discussion)
+
+        # ── Action the report if one triggered this lock ──────────────────
+        if body.report_id:
+            report = self.repo.get_report_by_id(body.report_id)
+            if report:
+                self.repo.action_report(report)
+
         self.repo.write_log(
             admin_id=admin_id,
             action="lock_discussion",
@@ -180,6 +187,13 @@ class ModerationService:
                 status_code=400, detail={"code": "FORBIDDEN", "message": "Cannot suspend yourself."}
             )
         self.repo.suspend_user(user)
+
+        # ── Action the report if one triggered this suspension ────────────
+        if body.report_id:
+            report = self.repo.get_report_by_id(body.report_id)
+            if report:
+                self.repo.action_report(report)
+
         self.repo.write_log(
             admin_id=admin_id,
             action="suspend_user",

@@ -24,6 +24,7 @@ class SubjectListItem(BaseModel):
     title: str
     slug: str
     description: str
+    status: str
     discussion_count: int = 0
     response_count: int = 0
     created_at: datetime

@@ -242,6 +242,7 @@ export interface SubjectListItem {
   title: string;
   slug: string;
   description: string;
+  status: string;
   discussion_count: number;
   response_count: number;
   created_at: string;

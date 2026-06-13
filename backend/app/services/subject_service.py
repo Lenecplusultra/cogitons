@@ -46,8 +46,13 @@ class _OldSlugFoundError(Exception):
 
 
 class SubjectService:
-    def list_subjects(self, db: Session, page: int, page_size: int) -> SubjectListResponse:
-        subjects, total = subject_repository.get_all_active(db, page, page_size)
+    def list_subjects(
+        self, db: Session, page: int, page_size: int, admin_view: bool = False
+    ) -> SubjectListResponse:
+        if admin_view:
+            subjects, total = subject_repository.get_all_non_removed(db, page, page_size)
+        else:
+            subjects, total = subject_repository.get_only_active(db, page, page_size)
         total_pages = math.ceil(total / page_size) if page_size > 0 else 0
 
         items = [
@@ -56,6 +61,7 @@ class SubjectService:
                 title=s.title,
                 slug=s.slug,
                 description=s.description,
+                status=s.status,
                 discussion_count=subject_repository.get_discussion_count(db, s.id),
                 response_count=subject_repository.get_response_count(db, s.id),
                 created_at=s.created_at,
