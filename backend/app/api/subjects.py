@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.core.dependencies import get_current_admin
+from app.core.dependencies import get_current_admin, get_optional_current_user
 from app.models.user import User
 from app.schemas.subject import (
     CreateSubjectRequest,
@@ -22,8 +22,10 @@ def list_subjects(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
+    current_user: User | None = Depends(get_optional_current_user),  # ← add
 ):
-    result = subject_service.list_subjects(db, page, page_size)
+    admin_view = current_user is not None and current_user.role == "admin"
+    result = subject_service.list_subjects(db, page, page_size, admin_view=admin_view)
     return {"success": True, "data": result.model_dump()}
 
 

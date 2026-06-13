@@ -9,11 +9,28 @@ from app.models.subject import Subject, SubjectSlugHistory
 
 
 class SubjectRepository:
-    def get_all_active(
+    def get_only_active(
         self, db: Session, page: int = 1, page_size: int = 20
     ) -> tuple[list[Subject], int]:
-        """Return paginated active subjects and total count."""
+        """Public list — active subjects only."""
         base_q = select(Subject).where(Subject.status == "active")
+        total = db.scalar(select(func.count()).select_from(base_q.subquery())) or 0
+        subjects = (
+            db.execute(
+                base_q.order_by(Subject.created_at.desc())
+                .offset((page - 1) * page_size)
+                .limit(page_size)
+            )
+            .scalars()
+            .all()
+        )
+        return list(subjects), total
+
+    def get_all_non_removed(
+        self, db: Session, page: int = 1, page_size: int = 20
+    ) -> tuple[list[Subject], int]:
+        """Admin list — active + archived, excludes removed."""
+        base_q = select(Subject).where(Subject.status != "removed")
         total = db.scalar(select(func.count()).select_from(base_q.subquery())) or 0
         subjects = (
             db.execute(

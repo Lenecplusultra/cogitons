@@ -1,4 +1,3 @@
-// frontend/src/app/admin/moderation/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -7,8 +6,71 @@ import Link from "next/link";
 import { api, type ReportQueueItem, type ReportContext } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 
+const serif = "'Lora', Georgia, serif";
+const mono = "'DM Mono', monospace";
+const ACTION_LABELS: Record<string, string> = {
+  dismiss_report: "Report dismissed",
+  remove_content: "Content removed",
+  lock_discussion: "Discussion locked",
+  unlock_discussion: "Discussion unlocked",
+  suspend_user: "User suspended",
+  restore_user: "User restored",
+};
+
 type StatusFilter = "pending" | "dismissed" | "actioned";
 
+// ── Admin sidebar ─────────────────────────────────────────────────────────────
+function AdminSidebar({ active }: { active: "reports" | "subjects" }) {
+  return (
+    <aside
+      className="hidden md:flex w-[200px] shrink-0 flex-col"
+      style={{ background: "#0F1520", minHeight: "100vh", position: "sticky", top: 0 }}
+    >
+      <div
+        className="px-5 py-6 text-base italic text-white border-b"
+        style={{ fontFamily: serif, borderColor: "rgba(255,255,255,.07)", color: "#AAC8E8" }}
+      >
+        Cogitons
+        <span
+          className="block text-[10px] not-italic mt-0.5"
+          style={{ fontFamily: mono, color: "rgba(255,255,255,.25)", letterSpacing: ".08em" }}
+        >
+          Admin
+        </span>
+      </div>
+      <nav className="mt-3 flex flex-col gap-0.5 px-2">
+        <Link
+          href="/admin/moderation"
+          className="flex items-center gap-2 rounded px-3 py-2 text-xs transition-colors"
+          style={{
+            fontFamily: serif,
+            color: active === "reports" ? "#AAC8E8" : "rgba(255,255,255,.45)",
+            background: active === "reports" ? "rgba(170,200,232,.08)" : "transparent",
+            borderLeft: active === "reports" ? "2px solid #AAC8E8" : "2px solid transparent",
+            fontWeight: active === "reports" ? 500 : 400,
+          }}
+        >
+          🚩 Reports
+        </Link>
+        <Link
+          href="/admin/subjects"
+          className="flex items-center gap-2 rounded px-3 py-2 text-xs transition-colors"
+          style={{
+            fontFamily: serif,
+            color: active === "subjects" ? "#AAC8E8" : "rgba(255,255,255,.45)",
+            background: active === "subjects" ? "rgba(170,200,232,.08)" : "transparent",
+            borderLeft: active === "subjects" ? "2px solid #AAC8E8" : "2px solid transparent",
+            fontWeight: active === "subjects" ? 500 : 400,
+          }}
+        >
+          📚 Subjects
+        </Link>
+      </nav>
+    </aside>
+  );
+}
+
+// ── Report card ───────────────────────────────────────────────────────────────
 function ReportCard({
   report,
   onAction,
@@ -68,42 +130,65 @@ function ReportCard({
     onAction();
   }
 
-  const contextLink = context?.found && context.discussion_id
-    ? `/discussions/${context.discussion_id}${context.anchor ? `#${context.anchor}` : ""}`
-    : null;
+  const contextLink =
+    context?.found && context.discussion_id
+      ? `/discussions/${context.discussion_id}${context.anchor ? `#${context.anchor}` : ""}`
+      : null;
 
   const isPending = report.status === "pending";
   const isRemoved = context?.status === "removed";
   const isLocked = context?.status === "locked";
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-5">
+    <div
+      className="rounded-[10px] p-5"
+      style={{
+        background: "#fff",
+        border: "1px solid var(--border-soft, #E8E4DC)",
+        boxShadow: "var(--shadow, 0 1px 3px rgba(15,39,68,.06), 0 4px 16px rgba(15,39,68,.04))",
+      }}
+    >
       {/* Header row */}
-      <div className="flex items-start justify-between gap-4 mb-4">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs font-semibold uppercase tracking-wide text-red-500 bg-red-50 px-2 py-0.5 rounded">
-              {report.reason.replace(/_/g, " ")}
-            </span>
-            <span className="text-xs text-gray-400 capitalize bg-gray-100 px-2 py-0.5 rounded">
+      <div className="mb-4 flex items-start justify-between gap-4">
+        <div className="space-y-1.5">
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Target type badge */}
+            <span
+              className="rounded-full px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-wide"
+              style={{ fontFamily: mono, background: "var(--sky, #E8F0F7)", color: "var(--navy, #0F2744)" }}
+            >
               {report.target_type}
             </span>
+            {/* Reason badge */}
+            <span
+              className="rounded-full px-2.5 py-0.5 text-[10px] font-medium"
+              style={{ fontFamily: mono, background: "var(--red-bg, #FAE8E8)", color: "var(--red, #A82020)" }}
+            >
+              {report.reason.replace(/_/g, " ")}
+            </span>
             {isRemoved && (
-              <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded">
+              <span
+                className="rounded-full px-2.5 py-0.5 text-[10px]"
+                style={{ fontFamily: mono, background: "var(--cream-dark, #F0EDE8)", color: "var(--text-3, #6A7A8A)" }}
+              >
                 removed
               </span>
             )}
             {isLocked && (
-              <span className="text-xs text-amber-600 bg-amber-50 px-2 py-0.5 rounded">
+              <span
+                className="rounded-full px-2.5 py-0.5 text-[10px]"
+                style={{ fontFamily: mono, background: "var(--amber-bg, #FFF5E0)", color: "var(--amber, #7A5010)" }}
+              >
                 locked
               </span>
             )}
           </div>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs" style={{ color: "var(--text-3, #6A7A8A)" }}>
             Reported by{" "}
             <Link
               href={`/profile/${report.reporter.username}`}
-              className="font-medium text-gray-700 hover:text-[#2E6DA4] transition-colors"
+              className="font-medium hover:underline"
+              style={{ color: "var(--text-2, #3A4A5A)" }}
             >
               {report.reporter.username}
             </Link>
@@ -115,17 +200,17 @@ function ReportCard({
             })}
           </p>
           {report.details && (
-            <p className="text-sm text-gray-600 mt-1 italic">
+            <p className="text-sm italic" style={{ color: "var(--text-2, #3A4A5A)" }}>
               &ldquo;{report.details}&rdquo;
             </p>
           )}
         </div>
-
         {contextLink && (
           <Link
             href={contextLink}
-            className="shrink-0 text-xs text-[#2E6DA4] hover:underline"
             target="_blank"
+            className="shrink-0 text-xs hover:underline"
+            style={{ color: "var(--blue, #1E5FA8)" }}
           >
             View in context ↗
           </Link>
@@ -133,37 +218,47 @@ function ReportCard({
       </div>
 
       {/* Content preview */}
-      <div className="mb-4 bg-gray-50 border border-gray-200 rounded-lg p-4">
+      <div
+        className="mb-4 rounded-[8px] p-4"
+        style={{ background: "var(--cream, #FAF8F5)", border: "1px solid var(--border-soft, #E8E4DC)" }}
+      >
         {contextLoading ? (
-          <div className="h-4 bg-gray-200 rounded w-3/4 animate-pulse" />
+          <div className="h-4 w-3/4 animate-pulse rounded" style={{ background: "var(--border, #DDD8D0)" }} />
         ) : !context?.found ? (
-          <p className="text-xs text-gray-400 italic">Content no longer exists.</p>
+          <p className="text-xs italic" style={{ color: "var(--text-4, #9AAABB)" }}>
+            Content no longer exists.
+          </p>
         ) : (
           <>
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-xs text-gray-400 font-medium">
-                {context.target_type === "response" ? "Response" : "Discussion"} by{" "}
-                <Link
-                  href={`/profile/${context.author}`}
-                  className="text-gray-600 hover:text-[#2E6DA4] transition-colors"
-                >
-                  {context.author}
-                </Link>
-              </p>
-            </div>
-            <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap line-clamp-6">
+            <p className="mb-2 text-xs" style={{ color: "var(--text-3, #6A7A8A)" }}>
+              {context.target_type === "response" ? "Response" : "Discussion"} by{" "}
+              <Link
+                href={`/profile/${context.author}`}
+                className="hover:underline"
+                style={{ color: "var(--text-2, #3A4A5A)" }}
+              >
+                {context.author}
+              </Link>
+            </p>
+            <p
+              className="line-clamp-6 whitespace-pre-wrap text-sm leading-relaxed"
+              style={{ color: "var(--text, #0F1A26)" }}
+            >
               {context.body}
             </p>
           </>
         )}
       </div>
 
-      {/* Action taken (for dismissed/actioned) */}
+      {/* Action taken (dismissed / actioned) */}
       {context?.action_taken && (
-        <div className="mb-4 px-4 py-3 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-700 space-y-0.5">
+        <div
+          className="mb-4 rounded-[8px] px-4 py-3 text-xs"
+          style={{ background: "var(--sky, #E8F0F7)", border: "1px solid var(--sky-mid, #C8DDEF)", color: "var(--navy, #0F2744)" }}
+        >
           <p>
-            <span className="font-semibold capitalize">
-              {context.action_taken.action}
+            <span className="font-semibold">
+              {ACTION_LABELS[context.action_taken.action] ?? context.action_taken.action}
             </span>
             {" · "}by {context.action_taken.admin}
             {" · "}
@@ -174,15 +269,14 @@ function ReportCard({
             })}
           </p>
           {context.action_taken.notes && (
-            <p className="text-blue-600 italic">
+            <p className="mt-0.5 italic" style={{ color: "var(--blue, #1E5FA8)" }}>
               &ldquo;{context.action_taken.notes}&rdquo;
             </p>
           )}
         </div>
       )}
 
-      {/* Actions — only for pending reports */}
-      {/* Notes + actions — pending reports get full controls, actioned get unlock only */}
+      {/* Actions */}
       {(isPending || isLocked) && (
         <>
           {isPending && (
@@ -191,53 +285,40 @@ function ReportCard({
               onChange={(e) => setNotes(e.target.value)}
               rows={2}
               placeholder="Admin notes (optional)…"
-              className="w-full border border-gray-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#2E6DA4] resize-none mb-3"
+              className="mb-3 w-full resize-none rounded-[6px] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
+              style={{ border: "1px solid var(--border, #DDD8D0)", background: "#fff" }}
             />
           )}
-
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex flex-wrap items-center gap-2">
             {isPending && (
               <>
-                <button
-                  onClick={handleDismiss}
-                  disabled={actionLoading}
-                  className="px-3 py-1.5 rounded border border-gray-200 text-xs text-gray-600 hover:border-gray-400 disabled:opacity-50 transition-colors"
-                >
+                <ActionBtn onClick={handleDismiss} disabled={actionLoading}>
                   Dismiss
-                </button>
-
-                <button
+                </ActionBtn>
+                <ActionBtn
                   onClick={handleRemove}
                   disabled={actionLoading || !context?.found || isRemoved}
-                  className="px-3 py-1.5 rounded border border-red-200 text-xs text-red-600 hover:bg-red-50 disabled:opacity-50 transition-colors"
+                  color="red"
                 >
                   {isRemoved ? "Already removed" : "Remove content"}
-                </button>
+                </ActionBtn>
               </>
             )}
-
             {report.target_type === "discussion" && !isRemoved && (
               isLocked ? (
-                <button
-                  onClick={handleUnlock}
-                  disabled={actionLoading}
-                  className="px-3 py-1.5 rounded border border-green-200 text-xs text-green-600 hover:bg-green-50 disabled:opacity-50 transition-colors"
-                >
+                <ActionBtn onClick={handleUnlock} disabled={actionLoading} color="green">
                   Unlock discussion
-                </button>
+                </ActionBtn>
               ) : isPending ? (
-                <button
-                  onClick={handleLock}
-                  disabled={actionLoading || !context?.found}
-                  className="px-3 py-1.5 rounded border border-amber-200 text-xs text-amber-600 hover:bg-amber-50 disabled:opacity-50 transition-colors"
-                >
+                <ActionBtn onClick={handleLock} disabled={actionLoading || !context?.found} color="amber">
                   Lock discussion
-                </button>
+                </ActionBtn>
               ) : null
             )}
-
             {actionLoading && (
-              <span className="text-xs text-gray-400">Processing…</span>
+              <span className="text-xs" style={{ color: "var(--text-4, #9AAABB)" }}>
+                Processing…
+              </span>
             )}
           </div>
         </>
@@ -246,6 +327,37 @@ function ReportCard({
   );
 }
 
+function ActionBtn({
+  children,
+  onClick,
+  disabled,
+  color = "default",
+}: {
+  children: React.ReactNode;
+  onClick: () => void;
+  disabled?: boolean;
+  color?: "default" | "red" | "green" | "amber";
+}) {
+  const styles: Record<string, { border: string; color: string; bg?: string }> = {
+    default: { border: "var(--border, #DDD8D0)", color: "var(--text-2, #3A4A5A)" },
+    red: { border: "#E0A0A0", color: "var(--red, #A82020)", bg: "var(--red-bg, #FAE8E8)" },
+    green: { border: "#9ACAB0", color: "var(--green, #1A6645)", bg: "var(--green-bg, #E8F5EE)" },
+    amber: { border: "#E0C070", color: "var(--amber, #7A5010)", bg: "var(--amber-bg, #FFF5E0)" },
+  };
+  const s = styles[color];
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className="rounded-full px-3 py-1.5 text-xs transition-colors disabled:opacity-40"
+      style={{ border: `1px solid ${s.border}`, color: s.color, background: s.bg ?? "transparent" }}
+    >
+      {children}
+    </button>
+  );
+}
+
+// ── Page ──────────────────────────────────────────────────────────────────────
 export default function AdminModerationPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
@@ -257,9 +369,7 @@ export default function AdminModerationPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!authLoading && (!user || user.role !== "admin")) {
-      router.replace("/");
-    }
+    if (!authLoading && (!user || user.role !== "admin")) router.replace("/");
   }, [user, authLoading, router]);
 
   const load = (p: number, s: StatusFilter) => {
@@ -278,75 +388,83 @@ export default function AdminModerationPage() {
   if (authLoading || !user) return null;
 
   return (
-    <main className="min-h-screen bg-gray-50">
-      <div className="bg-[#1A3C5E] px-6 py-8">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-white">Moderation Queue</h1>
-            <p className="text-white/50 text-sm mt-1">Admin</p>
-          </div>
-          <Link
-            href="/admin/subjects"
-            className="text-white/60 hover:text-white text-sm transition-colors"
-          >
-            ← Subjects
-          </Link>
-        </div>
-      </div>
+    <div className="flex min-h-screen" style={{ background: "var(--cream, #FAF8F5)" }}>
+      <AdminSidebar active="reports" />
 
-      <div className="max-w-4xl mx-auto px-6 py-8">
-        <div className="flex gap-2 mb-6">
-          {(["pending", "dismissed", "actioned"] as StatusFilter[]).map((s) => (
-            <button
-              key={s}
-              onClick={() => { setStatusFilter(s); setPage(1); }}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors capitalize ${
-                statusFilter === s
-                  ? "bg-[#1A3C5E] text-white"
-                  : "bg-white border border-gray-200 text-gray-600 hover:border-[#2E6DA4]"
-              }`}
-            >
-              {s}
-            </button>
-          ))}
+      <main className="flex-1 min-w-0">
+        {/* Page header */}
+        <div
+          className="px-8 py-7 border-b"
+          style={{ background: "#fff", borderColor: "var(--border-soft, #E8E4DC)" }}
+        >
+          <p className="mb-1 text-xs uppercase tracking-widest" style={{ fontFamily: mono, color: "var(--text-4, #9AAABB)" }}>
+            Admin
+          </p>
+          <h1 className="text-2xl" style={{ fontFamily: serif, fontWeight: 600, color: "var(--navy, #0F2744)" }}>
+            Pending Reports
+          </h1>
         </div>
 
-        {loading ? (
-          <p className="text-gray-400">Loading…</p>
-        ) : items.length === 0 ? (
-          <div className="bg-white border border-gray-200 rounded-lg p-10 text-center">
-            <p className="text-gray-400">No {statusFilter} reports.</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {items.map((report) => (
-              <ReportCard
-                key={report.id}
-                report={report}
-                onAction={() => load(page, statusFilter)}
-              />
-            ))}
-          </div>
-        )}
-
-        {totalPages > 1 && (
-          <div className="flex justify-center gap-2 mt-6">
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+        <div className="px-8 py-6">
+          {/* Filter tabs */}
+          <div className="mb-6 flex gap-2">
+            {(["pending", "dismissed", "actioned"] as StatusFilter[]).map((s) => (
               <button
-                key={p}
-                onClick={() => setPage(p)}
-                className={`w-9 h-9 rounded text-sm font-medium transition-colors ${
-                  p === page
-                    ? "bg-[#2E6DA4] text-white"
-                    : "bg-white border border-gray-200 text-gray-600 hover:border-[#2E6DA4]"
-                }`}
+                key={s}
+                onClick={() => { setStatusFilter(s); setPage(1); }}
+                className="rounded-full px-4 py-1.5 text-xs capitalize transition-colors"
+                style={{
+                  fontFamily: mono,
+                  background: statusFilter === s ? "var(--navy, #0F2744)" : "#fff",
+                  color: statusFilter === s ? "#fff" : "var(--text-3, #6A7A8A)",
+                  border: statusFilter === s ? "1px solid var(--navy, #0F2744)" : "1px solid var(--border, #DDD8D0)",
+                  fontWeight: statusFilter === s ? 500 : 400,
+                }}
               >
-                {p}
+                {s}
               </button>
             ))}
           </div>
-        )}
-      </div>
-    </main>
+
+          {loading ? (
+            <p className="text-sm" style={{ color: "var(--text-4, #9AAABB)" }}>Loading…</p>
+          ) : items.length === 0 ? (
+            <div
+              className="rounded-[10px] p-10 text-center text-sm"
+              style={{ border: "1px dashed var(--border, #DDD8D0)", color: "var(--text-4, #9AAABB)" }}
+            >
+              No {statusFilter} reports.
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {items.map((report) => (
+                <ReportCard key={report.id} report={report} onAction={() => load(page, statusFilter)} />
+              ))}
+            </div>
+          )}
+
+          {totalPages > 1 && (
+            <div className="mt-6 flex justify-center gap-2">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setPage(p)}
+                  className="flex h-9 w-9 items-center justify-center rounded text-sm transition-colors"
+                  style={{
+                    fontFamily: mono,
+                    background: p === page ? "var(--blue, #1E5FA8)" : "#fff",
+                    color: p === page ? "#fff" : "var(--text-2, #3A4A5A)",
+                    border: p === page ? "1px solid var(--blue, #1E5FA8)" : "1px solid var(--border, #DDD8D0)",
+                    fontWeight: p === page ? 600 : 400,
+                  }}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </main>
+    </div>
   );
 }
