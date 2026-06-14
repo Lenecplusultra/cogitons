@@ -15,8 +15,8 @@ passlib[bcrypt]
 resend==2.0.0
 
 # Config & validation
-pydantic==2.7.1
-pydantic-settings==2.2.1
+pydantic==2.7.4
+pydantic-core==2.18.4
 python-dotenv==1.0.1
 python-multipart==0.0.9
 
