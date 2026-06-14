@@ -22,12 +22,12 @@ class Settings(BaseSettings):
     APP_ENV: str = "development"
     FRONTEND_URL: str = "http://localhost:3000"
     ALLOWED_ORIGINS: list[str] = [
-    "http://localhost:3001",
-    "http://localhost:3000",
-    "https://cogitons.vercel.app",
-    "https://cogitons.com",
-    "https://www.cogitons.com",
-]
+        "http://localhost:3001",
+        "http://localhost:3000",
+        "https://cogitons.vercel.app",
+        "https://cogitons.com",
+        "https://www.cogitons.com",
+    ]
 
     # Rate limiting (max resend-verification requests per hour per email)
     RESEND_VERIFICATION_RATE_LIMIT: int = 3
