@@ -90,5 +90,22 @@ class SubjectRepository:
             or 0
         )
 
+    def get_contributor_count(self, db: Session, subject_id: UUID) -> int:
+        """Distinct authors across non-removed discussions and responses for this subject."""
+        from sqlalchemy import union
+
+        disc_authors = select(Discussion.author_id).where(
+            Discussion.author_id.isnot(None),
+            Discussion.subject_id == subject_id,
+            Discussion.status != "removed",
+        )
+        resp_authors = (
+            select(Response.author_id)
+            .join(Discussion, Response.discussion_id == Discussion.id)
+            .where(Discussion.subject_id == subject_id, Response.status != "removed")
+        )
+        combined = union(disc_authors, resp_authors).subquery()
+        return db.scalar(select(func.count()).select_from(combined)) or 0  # ← db not self.db
+
 
 subject_repository = SubjectRepository()

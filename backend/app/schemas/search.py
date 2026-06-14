@@ -31,9 +31,11 @@ class SearchDiscussionSubject(BaseModel):
 class SearchDiscussionResult(BaseModel):
     id: uuid.UUID
     title: str
+    body: str
     subject: SearchDiscussionSubject
     author: SearchDiscussionAuthor
     useful_count: int
+    viewer_voted: bool = False
     response_count: int
     created_at: datetime
 

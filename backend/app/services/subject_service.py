@@ -112,6 +112,8 @@ class SubjectService:
             description=subject.description,
             status=subject.status,
             discussion_count=subject_repository.get_discussion_count(db, subject.id),
+            response_count=subject_repository.get_response_count(db, subject.id),  # ← add
+            contributor_count=subject_repository.get_contributor_count(db, subject.id),  # ← add
             created_at=subject.created_at,
         )
 

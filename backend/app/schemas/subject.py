@@ -14,6 +14,8 @@ class SubjectResponse(BaseModel):
     description: str
     status: str
     discussion_count: int = 0
+    response_count: int = 0
+    contributor_count: int = 0
     created_at: datetime
 
     model_config = {"from_attributes": True}

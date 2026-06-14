@@ -1,9 +1,11 @@
-// frontend/src/app/subjects/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { api, type SubjectListItem, type SubjectListData } from "@/lib/api";
+
+const serif = "'Lora', Georgia, serif";
+const mono = "'DM Mono', monospace";
 
 export default function SubjectsPage() {
   const [data, setData] = useState<SubjectListData | null>(null);
@@ -13,6 +15,7 @@ export default function SubjectsPage() {
 
   useEffect(() => {
     setLoading(true);
+    setData(null);   
     setError(null);
     api.subjects.list(page, 6).then((res) => {
       if (res.success) setData(res.data);
@@ -24,46 +27,34 @@ export default function SubjectsPage() {
   const startIndex = (page - 1) * 6;
 
   return (
-    <main className="min-h-screen" style={{ background: "#F5F2ED" }}>
-      <div className="max-w-6xl mx-auto px-6 py-10">
+    <main className="min-h-screen" style={{ background: "var(--cream, #FAF8F5)" }}>
 
-        {/* Header */}
-        <div className="mb-8">
-          <h1
-            className="text-[#1A3C5E] mb-1"
-            style={{
-              fontFamily: "Georgia, 'Times New Roman', serif",
-              fontSize: "2rem",
-              fontWeight: 700,
-            }}
-          >
+      {/* Page header */}
+      <div style={{ background: "#fff", borderBottom: "1px solid var(--border-soft, #E8E4DC)" }}>
+        <div className="px-8 py-6">
+          <h1 className="text-2xl font-medium" style={{ fontFamily: serif, color: "var(--navy, #0F2744)" }}>
             All Subjects
           </h1>
           {data && (
-            <p className="text-gray-400 text-sm">
+            <p className="mt-1 text-sm" style={{ color: "var(--text-3, #6A7A8A)" }}>
               {data.pagination.total} active {data.pagination.total === 1 ? "subject" : "subjects"} · organized knowledge areas
             </p>
           )}
         </div>
+      </div>
 
-        {/* Loading */}
+      <div className="px-8 py-8">
         {loading && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[1,2,3,4,5,6].map(i => (
-              <div key={i} className="bg-white rounded-xl h-44 animate-pulse" style={{ border: "1px solid #E8E3DB" }} />
+              <div key={i} className="h-44 animate-pulse rounded-[10px]" style={{ border: "1px solid var(--border-soft, #E8E4DC)", background: "#fff" }} />
             ))}
           </div>
         )}
 
-        {!loading && error && (
-          <p className="text-center text-red-500 py-16">{error}</p>
-        )}
+        {!loading && error && <p className="py-16 text-center text-sm" style={{ color: "var(--red, #A82020)" }}>{error}</p>}
+        {!loading && !error && data?.items.length === 0 && <p className="py-16 text-center text-sm" style={{ color: "var(--text-4, #9AAABB)" }}>No subjects yet.</p>}
 
-        {!loading && !error && data?.items.length === 0 && (
-          <p className="text-center text-gray-400 py-16">No subjects yet.</p>
-        )}
-
-        {/* Grid */}
         {!loading && !error && data && data.items.length > 0 && (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -71,128 +62,62 @@ export default function SubjectsPage() {
                 <Link
                   key={subject.id}
                   href={`/subjects/${subject.slug}`}
-                  className="group bg-white rounded-xl px-5 py-5 flex flex-col justify-between transition-all"
-                  style={{
-                    border: "1px solid #E8E3DB",
-                    boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
-                    minHeight: 160,
-                  }}
-                  onMouseEnter={e => {
-                    (e.currentTarget as HTMLElement).style.borderColor = "#2E6DA4";
-                    (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 12px rgba(0,0,0,0.08)";
-                  }}
-                  onMouseLeave={e => {
-                    (e.currentTarget as HTMLElement).style.borderColor = "#E8E3DB";
-                    (e.currentTarget as HTMLElement).style.boxShadow = "0 1px 3px rgba(0,0,0,0.04)";
-                  }}
+                  className="group flex flex-col justify-between rounded-[10px] px-5 py-5 transition-all hover:border-[#A8C8E8]"
+                  style={{ background: "#fff", border: "1px solid var(--border-soft, #E8E4DC)", boxShadow: "var(--shadow, 0 1px 3px rgba(15,39,68,.06), 0 4px 16px rgba(15,39,68,.04))", minHeight:180 }}
                 >
-                  {/* Card number */}
                   <div>
-                    <p
-                      className="mb-2"
-                      style={{
-                        fontSize: 11,
-                        color: "#C9C2B8",
-                        fontFamily: "var(--font-geist-mono, monospace)",
-                        fontWeight: 500,
-                      }}
-                    >
+                    <p className="mb-2.5 text-[10px]" style={{ fontFamily: mono, color: "#A8C8E8" }}>
                       {String(startIndex + idx + 1).padStart(2, "0")}
                     </p>
-
-                    {/* Title */}
-                    <p
-                      className="mb-2 group-hover:text-[#2E6DA4] transition-colors"
-                      style={{
-                        fontFamily: "Georgia, 'Times New Roman', serif",
-                        fontSize: 15,
-                        fontWeight: 700,
-                        color: "#1A3C5E",
-                        lineHeight: 1.3,
-                      }}
-                    >
+                    <p className="mb-1.5 text-[15px] font-medium leading-snug group-hover:text-[#1E5FA8] transition-colors" style={{ fontFamily: serif, color: "var(--navy, #0F2744)" }}>
                       {subject.title}
                     </p>
-
-                    {/* Description */}
-                    <p
-                      className="line-clamp-3"
-                      style={{ fontSize: 12, color: "#9CA3AF", lineHeight: 1.55 }}
-                    >
+                    <p className="line-clamp-3 text-xs leading-relaxed" style={{ color: "var(--text-2, #3A4A5A)" }}>
                       {subject.description}
                     </p>
                   </div>
-
-                  {/* Footer */}
-                  <div className="flex items-center justify-between mt-4 pt-3" style={{ borderTop: "1px solid #F0EDE8" }}>
-                    <p style={{ fontSize: 11, color: "#9CA3AF" }}>
-                      {subject.discussion_count}{" "}
-                      {subject.discussion_count === 1 ? "discussion" : "discussions"}
-                      {" · "}
-                      {subject.response_count}{" "}
-                      {subject.response_count === 1 ? "response" : "responses"}
+                  <div className="mt-4 flex items-center justify-between border-t pt-3" style={{ borderColor: "var(--border-soft, #E8E4DC)" }}>
+                    <p className="text-[10px]" style={{ fontFamily: mono, color: "var(--text-4, #9AAABB)" }}>
+                      {subject.discussion_count} discussions · {subject.response_count} responses
                     </p>
-                    <svg
-                      className="text-gray-300 group-hover:text-[#2E6DA4] transition-colors"
-                      style={{ width: 14, height: 14 }}
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2.5}
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                    </svg>
+                    <span className="text-sm" style={{ color: "#A8C8E8" }}>→</span>
                   </div>
                 </Link>
               ))}
             </div>
 
-            {/* Pagination */}
             {data.pagination.total_pages > 1 && (
-              <div className="flex items-center justify-center gap-2 mt-10">
-                <button
-                  onClick={() => setPage(p => Math.max(1, p - 1))}
-                  disabled={page === 1}
-                  className="w-9 h-9 rounded-lg text-sm font-medium transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                  style={{
-                    background: "#FFFFFF",
-                    color: "#6B7280",
-                    border: "1px solid #E8E3DB",
-                  }}
-                >
-                  ←
-                </button>
-                {Array.from({ length: data.pagination.total_pages }, (_, i) => i + 1).map((p) => (
-                  <button
-                    key={p}
-                    onClick={() => setPage(p)}
-                    className="w-9 h-9 rounded-lg text-sm font-medium transition-colors"
-                    style={{
-                      background: p === page ? "#1A3C5E" : "#FFFFFF",
-                      color: p === page ? "#FFFFFF" : "#6B7280",
-                      border: p === page ? "1px solid #1A3C5E" : "1px solid #E8E3DB",
-                    }}
-                  >
-                    {p}
-                  </button>
+              <div className="mt-10 flex items-center justify-center gap-2">
+                <PagBtn onClick={() => setPage(p => Math.max(1, p-1))} disabled={page === 1}>←</PagBtn>
+                {Array.from({ length: data.pagination.total_pages }, (_, i) => i+1).map(p => (
+                  <PagBtn key={p} onClick={() => setPage(p)} active={p === page}>{p}</PagBtn>
                 ))}
-                <button
-                  onClick={() => setPage(p => Math.min(data.pagination.total_pages, p + 1))}
-                  disabled={page === data.pagination.total_pages}
-                  className="w-9 h-9 rounded-lg text-sm font-medium transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                  style={{
-                    background: "#FFFFFF",
-                    color: "#6B7280",
-                    border: "1px solid #E8E3DB",
-                  }}
-                >
-                  →
-                </button>
+                <PagBtn onClick={() => setPage(p => Math.min(data.pagination.total_pages, p+1))} disabled={page === data.pagination.total_pages}>→</PagBtn>
               </div>
             )}
           </>
         )}
       </div>
     </main>
+  );
+}
+
+function PagBtn({ children, onClick, disabled, active }: { children: React.ReactNode; onClick: () => void; disabled?: boolean; active?: boolean }) {
+  const mono = "'DM Mono', monospace";
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className="flex h-9 w-9 items-center justify-center rounded text-sm disabled:opacity-30"
+      style={{
+        fontFamily: mono,
+        background: active ? "var(--blue, #1E5FA8)" : "#fff",
+        color: active ? "#fff" : "var(--text-2, #3A4A5A)",
+        border: active ? "1px solid var(--blue, #1E5FA8)" : "1px solid var(--border, #DDD8D0)",
+        fontWeight: active ? 600 : 400,
+      }}
+    >
+      {children}
+    </button>
   );
 }

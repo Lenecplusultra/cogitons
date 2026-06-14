@@ -125,3 +125,41 @@ class DiscussionRepository:
             Vote.user_id == user_id,
         )
         return self.db.scalar(stmt) is not None
+
+    def get_viewer_voted_ids(
+        self, viewer_id: uuid.UUID, discussion_ids: list[uuid.UUID]
+    ) -> set[uuid.UUID]:
+        """Returns the set of discussion IDs the viewer has voted on."""
+        if not discussion_ids:
+            return set()
+        stmt = select(Vote.target_id).where(
+            Vote.target_type == "discussion",
+            Vote.target_id.in_(discussion_ids),
+            Vote.user_id == viewer_id,
+        )
+        return set(self.db.scalars(stmt).all())
+
+    def get_related(
+        self,
+        subject_id: uuid.UUID,
+        exclude_id: uuid.UUID,
+        limit: int = 3,
+    ) -> list[Discussion]:
+        useful_subq = (
+            select(Vote.target_id, func.count().label("useful_count"))
+            .where(Vote.target_type == "discussion")
+            .group_by(Vote.target_id)
+            .subquery()
+        )
+        stmt = (
+            select(Discussion)
+            .outerjoin(useful_subq, Discussion.id == useful_subq.c.target_id)
+            .where(
+                Discussion.subject_id == subject_id,
+                Discussion.id != exclude_id,
+                Discussion.status != "removed",
+            )
+            .order_by(func.coalesce(useful_subq.c.useful_count, 0).desc())
+            .limit(limit)
+        )
+        return list(self.db.scalars(stmt).all())
