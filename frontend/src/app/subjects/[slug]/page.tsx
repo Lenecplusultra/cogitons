@@ -247,7 +247,7 @@ export default function SubjectPage() {
                 { label: "Discussions", value: total },
                 { label: "Responses", value: responseCount },
                 { label: "Contributors", value: contributorCount },
-              ].map((row, i, arr) => (
+             ].map((row) => (
                 <div
                   key={row.label}
                   className="flex items-center justify-between py-2.5"
