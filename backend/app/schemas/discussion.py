@@ -17,6 +17,7 @@ class SubjectSummarySchema(BaseModel):
     id: uuid.UUID
     title: str
     slug: str
+    description: str
 
     model_config = {"from_attributes": True}
 
@@ -44,7 +45,9 @@ class DiscussionCardSchema(BaseModel):
     id: uuid.UUID
     author: AuthorSchema
     title: str
+    body: str
     useful_count: int
+    viewer_voted: bool = False
     response_count: int
     edited: bool
     status: str

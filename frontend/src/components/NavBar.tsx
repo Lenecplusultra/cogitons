@@ -1,10 +1,12 @@
-// frontend/src/components/NavBar.tsx
 "use client";
 
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+
+const serif = "'Lora', Georgia, serif";
+const mono = "'DM Mono', monospace";
 
 export default function NavBar() {
   const { user, loading: authLoading, logout } = useAuth();
@@ -33,20 +35,15 @@ export default function NavBar() {
   return (
     <nav
       className="sticky top-0 z-50"
-      style={{ background: "#1A3C5E", borderBottom: "1px solid rgba(255,255,255,0.07)" }}
+      style={{ background: "var(--navy, #0F2744)", borderBottom: "1px solid rgba(255,255,255,.06)" }}
     >
-      <div className="max-w-5xl mx-auto px-4 flex items-center gap-5" style={{ height: 52 }}>
+      <div className="max-w-[1100px] mx-auto px-7 flex items-center gap-4" style={{ height: 52 }}>
 
         {/* Logo */}
         <Link
           href="/"
-          className="text-white shrink-0 hover:opacity-80 transition-opacity"
-          style={{
-            fontFamily: "Georgia, 'Times New Roman', serif",
-            fontSize: 17,
-            fontWeight: 700,
-            letterSpacing: "-0.01em",
-          }}
+          className="shrink-0 italic text-white hover:opacity-80 transition-opacity"
+          style={{ fontFamily: serif, fontSize: 20, letterSpacing: "-.3px", marginRight: 20 }}
         >
           Cogitons
         </Link>
@@ -54,30 +51,22 @@ export default function NavBar() {
         {/* Nav links */}
         <Link
           href="/"
-          className={`text-sm transition-colors ${isActive("/") ? "text-white font-medium" : "text-white/55 hover:text-white"}`}
+          className="text-xs transition-colors"
+          style={{ color: isActive("/") ? "#fff" : "rgba(255,255,255,.55)", fontWeight: isActive("/") ? 500 : 400 }}
         >
           Home
         </Link>
         <Link
           href="/subjects"
-          className={`text-sm transition-colors ${isActive("/subjects") ? "text-white font-medium" : "text-white/55 hover:text-white"}`}
+          className="text-xs transition-colors"
+          style={{ color: isActive("/subjects") ? "#fff" : "rgba(255,255,255,.55)", fontWeight: isActive("/subjects") ? 500 : 400 }}
         >
           Subjects
         </Link>
 
-        {/* Search icon */}
-        <button
-          onClick={() => setSearchOpen((v) => !v)}
-          className="text-white/40 hover:text-white/80 transition-colors"
-          aria-label="Search"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1010.5 18a7.5 7.5 0 006.15-3.35z" />
-          </svg>
-        </button>
-
-        {searchOpen && (
-          <form onSubmit={handleSearch} className="flex-1 max-w-xs">
+        {/* Search */}
+        {searchOpen ? (
+          <form onSubmit={handleSearch} className="flex-1 max-w-[380px]">
             <input
               autoFocus
               type="text"
@@ -85,12 +74,27 @@ export default function NavBar() {
               onChange={(e) => setQuery(e.target.value)}
               onBlur={() => !query && setSearchOpen(false)}
               placeholder="Search…"
-              className="w-full bg-white/10 text-white placeholder-white/30 border border-white/15 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-white/40 transition-all"
+              className="w-full rounded-full px-4 py-1.5 text-xs focus:outline-none"
+              style={{
+                background: "rgba(255,255,255,.08)",
+                border: "1px solid rgba(255,255,255,.15)",
+                color: "rgba(255,255,255,.8)",
+              }}
             />
           </form>
+        ) : (
+          <button
+            onClick={() => setSearchOpen(true)}
+            className="transition-colors"
+            style={{ color: "rgba(255,255,255,.35)" }}
+            aria-label="Search"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1010.5 18a7.5 7.5 0 006.15-3.35z" />
+            </svg>
+          </button>
         )}
 
-        {/* Spacer */}
         <div className="flex-1" />
 
         {/* Right side */}
@@ -99,42 +103,47 @@ export default function NavBar() {
             {user.role === "admin" && (
               <Link
                 href="/admin/subjects"
-                className="text-white/40 hover:text-white/70 text-xs transition-colors"
+                className="text-xs transition-colors"
+                style={{ color: "rgba(255,255,255,.4)" }}
               >
                 Admin
               </Link>
             )}
             <Link href={`/profile/${user.username}`} className="flex items-center gap-2 group">
               <div
-                className="w-7 h-7 rounded-full flex items-center justify-center text-white font-bold"
-                style={{
-                  background: "#2E6DA4",
-                  border: "1.5px solid rgba(255,255,255,0.2)",
-                  fontSize: 11,
-                }}
+                className="flex items-center justify-center rounded-full text-white font-semibold"
+                style={{ width: 28, height: 28, background: "var(--blue, #1E5FA8)", fontSize: 11 }}
               >
                 {user.username[0].toUpperCase()}
               </div>
-              <span className="text-white/70 group-hover:text-white text-sm transition-colors hidden sm:block">
+              <span
+                className="hidden sm:block text-xs transition-colors group-hover:text-white"
+                style={{ color: "rgba(255,255,255,.7)", fontFamily: mono }}
+              >
                 {user.username}
               </span>
             </Link>
             <button
               onClick={handleLogout}
-              className="text-white/35 hover:text-white/70 text-xs transition-colors"
+              className="text-xs transition-colors"
+              style={{ color: "rgba(255,255,255,.35)" }}
             >
               Log out
             </button>
           </div>
         ) : (
-          <div className="flex items-center gap-3">
-            <Link href="/login" className="text-white/60 hover:text-white text-sm transition-colors">
+          <div className="flex items-center gap-2">
+            <Link
+              href="/login"
+              className="text-xs transition-colors"
+              style={{ color: "rgba(255,255,255,.55)" }}
+            >
               Log in
             </Link>
             <Link
               href="/signup"
-              className="text-white text-sm font-semibold px-4 py-1.5 rounded-full hover:opacity-90 transition-opacity"
-              style={{ background: "#2E6DA4" }}
+              className="rounded-full px-4 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90"
+              style={{ background: "var(--blue, #1E5FA8)" }}
             >
               Sign up
             </Link>

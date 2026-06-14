@@ -15,6 +15,15 @@ from app.schemas.discussion import (
     PaginationSchema,
 )
 
+SNIPPET_LENGTH = 150
+
+
+def _snippet(text: str) -> str:
+    text = (text or "").strip()
+    if len(text) <= SNIPPET_LENGTH:
+        return text
+    return text[:SNIPPET_LENGTH].rstrip() + "…"
+
 
 class DiscussionService:
     def __init__(self, db: Session) -> None:
@@ -39,6 +48,13 @@ class DiscussionService:
         discussions, total = self.repo.list_by_subject(subject.id, sort, page, page_size)
         total_pages = max(1, -(-total // page_size))
 
+        # One bulk query for viewer votes instead of N individual queries
+        viewer_voted_ids: set[uuid.UUID] = set()
+        if current_user and discussions:
+            viewer_voted_ids = self.repo.get_viewer_voted_ids(
+                current_user.id, [d.id for d in discussions]
+            )
+
         items = []
         for d in discussions:
             items.append(
@@ -46,7 +62,9 @@ class DiscussionService:
                     id=d.id,
                     author={"id": d.author.id, "username": d.author.username},
                     title=d.title,
+                    body=_snippet(d.body),  # ← add
                     useful_count=self.repo.get_useful_count(d.id),
+                    viewer_voted=d.id in viewer_voted_ids,  # ← add
                     response_count=self.repo.get_response_count(d.id),
                     edited=d.edited,
                     status=d.status,
@@ -80,7 +98,12 @@ class DiscussionService:
 
         return DiscussionDetailSchema(
             id=d.id,
-            subject={"id": d.subject.id, "title": d.subject.title, "slug": d.subject.slug},
+            subject={
+                "id": d.subject.id,
+                "title": d.subject.title,
+                "slug": d.subject.slug,
+                "description": d.subject.description,
+            },
             author={"id": d.author.id, "username": d.author.username},
             title=d.title,
             body=d.body,
@@ -161,3 +184,18 @@ class DiscussionService:
 
         self.repo.soft_delete(d)
         self.db.commit()
+
+    def get_related(self, discussion_id: uuid.UUID, limit: int = 3) -> list[dict]:
+        d = self.repo.get_active_by_id(discussion_id)
+        if not d:
+            return []
+        items = self.repo.get_related(d.subject_id, discussion_id, limit)
+        return [
+            {
+                "id": str(item.id),
+                "title": item.title,
+                "useful_count": self.repo.get_useful_count(item.id),
+                "response_count": self.repo.get_response_count(item.id),
+            }
+            for item in items
+        ]

@@ -120,8 +120,11 @@ export const api = {
   },
 
   subjects: {
-    list: (page = 1, pageSize = 20) =>
-      request<SubjectListData>(`/subjects?page=${page}&page_size=${pageSize}`),
+    list: (page = 1, pageSize = 20, adminView = false) =>
+      request<SubjectListData>(
+        `/subjects?page=${page}&page_size=${pageSize}${adminView ? "&admin=true" : ""}`,
+        { cache: "no-store" }
+      ),
     get: (slug: string) =>
       request<SubjectDetail>(`/subjects/${slug}`),
     create: (body: { title: string; description: string }) =>
@@ -155,6 +158,11 @@ export const api = {
       request<{ voted: boolean; useful_count: number }>(
         `/discussions/${id}/vote`,
         { method: "POST" }
+      ),
+    related: (id: string) =>
+      request<Array<{ id: string; title: string; useful_count: number; response_count: number }>>(
+        `/discussions/${id}/related`,
+        { method: "GET" }
       ),
   },
 
@@ -255,6 +263,8 @@ export interface SubjectDetail {
   description: string;
   status: "active" | "archived" | "removed";
   discussion_count: number;
+  response_count: number;
+  contributor_count: number;
   created_at: string;
 }
  
@@ -277,7 +287,9 @@ export interface DiscussionCard {
   id: string;
   author: DiscussionAuthor;
   title: string;
+  body: string;
   useful_count: number;
+  viewer_voted: boolean;
   response_count: number;
   edited: boolean;
   status: string;
@@ -286,11 +298,12 @@ export interface DiscussionCard {
 
 export interface DiscussionDetail {
   id: string;
-  subject: { id: string; title: string; slug: string };
+  subject: { id: string; title: string; slug: string; description: string };
   author: DiscussionAuthor;
   title: string;
   body: string;
   useful_count: number;
+  viewer_voted: boolean;
   current_user_voted: boolean;
   response_count: number;
   edited: boolean;
@@ -314,6 +327,7 @@ export interface ResponseItem {
   author: DiscussionAuthor;
   body: string;
   useful_count: number;
+  viewer_voted: boolean;
   current_user_voted: boolean;
   edited: boolean;
   status: string;
@@ -341,9 +355,11 @@ export interface SearchSubjectResult {
 export interface SearchDiscussionResult {
   id: string;
   title: string;
+  body: string;
   subject: { title: string; slug: string };
   author: { username: string };
   useful_count: number;
+  viewer_voted: boolean;
   response_count: number;
   created_at: string;
 }
@@ -371,6 +387,7 @@ export interface FeedDiscussion {
   subject: { title: string; slug: string };
   author: { username: string };
   useful_count: number;
+  viewer_voted: boolean;
   response_count: number;
   created_at: string;
 }
@@ -380,6 +397,7 @@ export interface FeedMostUseful {
   title: string;
   subject: { title: string; slug: string };
   useful_count: number;
+  viewer_voted: boolean;
 }
  
 export interface FeedData {

@@ -1,8 +1,10 @@
-// frontend/src/components/ReportModal.tsx
 "use client";
 
 import { useState } from "react";
 import { api, type ReportReason } from "@/lib/api";
+
+const serif = "'Lora', Georgia, serif";
+const mono = "'DM Mono', monospace";
 
 const REASONS: { value: ReportReason; label: string }[] = [
   { value: "spam", label: "Spam" },
@@ -29,87 +31,57 @@ export default function ReportModal({ targetType, targetId, onClose }: ReportMod
   const [submitted, setSubmitted] = useState(false);
 
   async function handleSubmit() {
-    setSubmitting(true);
-    setError(null);
-    const res = await api.moderation.submitReport({
-      target_type: targetType,
-      target_id: targetId,
-      reason,
-      details: details.trim() || undefined,
-    });
+    setSubmitting(true); setError(null);
+    const res = await api.moderation.submitReport({ target_type: targetType, target_id: targetId, reason, details: details.trim() || undefined });
     setSubmitting(false);
-    if (res.success) {
-      setSubmitted(true);
-    } else {
-      setError(res.error.message);
-    }
+    if (res.success) setSubmitted(true);
+    else setError(res.error.message);
   }
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+      <div className="w-full max-w-md rounded-[10px] p-6" style={{ background: "#fff", boxShadow: "var(--shadow-lg, 0 4px 24px rgba(15,39,68,.10), 0 1px 4px rgba(15,39,68,.06))" }}>
         {submitted ? (
-          <div className="text-center py-4">
-            <p className="text-lg font-semibold text-[#1A3C5E] mb-2">Report received</p>
-            <p className="text-sm text-gray-500 mb-6">
-              Thank you. Our team will review this content.
-            </p>
-            <button
-              onClick={onClose}
-              className="px-4 py-2 rounded text-sm font-medium text-white bg-[#2E6DA4] hover:opacity-90"
-            >
-              Close
-            </button>
+          <div className="py-4 text-center">
+            <p className="mb-2 text-lg font-semibold" style={{ fontFamily: serif, color: "var(--navy, #0F2744)" }}>Report received</p>
+            <p className="mb-6 text-sm" style={{ color: "var(--text-3, #6A7A8A)" }}>Thank you. Our team will review this content.</p>
+            <button onClick={onClose} className="rounded-full px-4 py-2 text-sm font-medium text-white hover:opacity-90" style={{ background: "var(--blue, #1E5FA8)" }}>Close</button>
           </div>
         ) : (
           <>
-            <h2 className="text-lg font-semibold text-[#1A3C5E] mb-5">Report content</h2>
+            <h2 className="mb-5 text-lg font-semibold" style={{ fontFamily: serif, color: "var(--navy, #0F2744)" }}>Report content</h2>
 
-            <label className="block mb-4">
-              <span className="text-sm font-medium text-gray-700">Reason</span>
+            <div className="mb-4 space-y-1.5">
+              <label className="text-sm font-medium" style={{ color: "var(--text, #0F1A26)" }}>Reason</label>
               <select
                 value={reason}
                 onChange={(e) => setReason(e.target.value as ReportReason)}
-                className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2E6DA4] bg-white"
+                className="w-full rounded-[6px] px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
+                style={{ border: "1px solid var(--border, #DDD8D0)", background: "#fff", color: "var(--text, #0F1A26)" }}
               >
-                {REASONS.map((r) => (
-                  <option key={r.value} value={r.value}>
-                    {r.label}
-                  </option>
-                ))}
+                {REASONS.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
               </select>
-            </label>
+            </div>
 
-            <label className="block mb-5">
-              <span className="text-sm font-medium text-gray-700">
-                Additional details{" "}
-                <span className="text-gray-400 font-normal">(optional)</span>
-              </span>
+            <div className="mb-5 space-y-1.5">
+              <label className="text-sm font-medium" style={{ color: "var(--text, #0F1A26)" }}>
+                Additional details <span className="font-normal" style={{ color: "var(--text-3, #6A7A8A)" }}>(optional)</span>
+              </label>
               <textarea
                 value={details}
                 onChange={(e) => setDetails(e.target.value)}
                 rows={3}
                 placeholder="Describe the issue…"
-                className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2E6DA4] resize-none"
+                className="w-full resize-none rounded-[6px] px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
+                style={{ border: "1px solid var(--border, #DDD8D0)" }}
               />
-            </label>
+            </div>
 
-            {error && (
-              <p className="text-red-500 text-sm mb-4">{error}</p>
-            )}
+            {error && <p className="mb-4 text-sm" style={{ color: "var(--red, #A82020)", fontFamily: mono }}>{error}</p>}
 
-            <div className="flex gap-3 justify-end">
-              <button
-                onClick={onClose}
-                className="px-4 py-2 rounded border border-gray-200 text-sm text-gray-600 hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSubmit}
-                disabled={submitting}
-                className="px-4 py-2 rounded text-sm font-medium text-white bg-red-500 hover:opacity-90 disabled:opacity-50 transition-opacity"
-              >
+            <div className="flex justify-end gap-3">
+              <button onClick={onClose} className="rounded-full px-4 py-2 text-sm transition-colors" style={{ border: "1px solid var(--border, #DDD8D0)", color: "var(--text-2, #3A4A5A)" }}>Cancel</button>
+              <button onClick={handleSubmit} disabled={submitting} className="rounded-full px-4 py-2 text-sm font-medium text-white disabled:opacity-50 hover:opacity-90" style={{ background: "var(--red, #A82020)" }}>
                 {submitting ? "Submitting…" : "Submit report"}
               </button>
             </div>

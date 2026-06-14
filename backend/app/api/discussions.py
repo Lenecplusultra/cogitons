@@ -73,3 +73,13 @@ def delete_discussion(
     service = DiscussionService(db)
     service.delete(discussion_id, current_user)
     return {"success": True, "message": "Discussion deleted successfully."}
+
+
+@router.get("/discussions/{discussion_id}/related", response_model=dict)
+def get_related_discussions(
+    discussion_id: uuid.UUID,
+    db: Session = Depends(get_db),
+) -> dict:
+    service = DiscussionService(db)
+    data = service.get_related(discussion_id)
+    return {"success": True, "data": data}

@@ -21,10 +21,11 @@ router = APIRouter(prefix="/subjects", tags=["subjects"])
 def list_subjects(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
+    admin: bool = Query(False),
     db: Session = Depends(get_db),
     current_user: User | None = Depends(get_optional_current_user),  # ← add
 ):
-    admin_view = current_user is not None and current_user.role == "admin"
+    admin_view = admin and current_user is not None and current_user.role == "admin"
     result = subject_service.list_subjects(db, page, page_size, admin_view=admin_view)
     return {"success": True, "data": result.model_dump()}
 
